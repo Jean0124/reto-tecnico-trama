@@ -19,7 +19,7 @@ test("del problema al requerimiento confirmado", async ({ page }) => {
   await page.getByRole("button", { name: "Enviar" }).click();
 
   await expect(page.getByText("Esperando confirmación")).toBeVisible();
-  await expect(page.getByText("Registro de casos")).toBeVisible();
+  await expect(page.getByText("Registro de casos", { exact: true })).toBeVisible();
 
   await page.getByRole("button", { name: "Confirmar" }).click();
   await expect(page.getByText("Requerimiento confirmado.")).toBeVisible();

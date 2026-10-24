@@ -71,7 +71,7 @@ export function PanelRequerimiento({ estado, onConfirmar, onAjustar }: Props) {
               ))}
             </div>
           )}
-          <div className="flex-1 space-y-4 overflow-y-auto p-6">
+          <div className="flex-1 space-y-6 overflow-y-auto p-6">
             <Detalle req={req} />
           </div>
           <Acciones
@@ -164,70 +164,85 @@ function Tarjeta({ children, className }: { children: ReactNode; className?: str
   return <div className={cn("rounded-xl p-4 ring-1 ring-foreground/10", className)}>{children}</div>;
 }
 
+const TIPO_LEGIBLE: Record<string, string> = {
+  excel: "Excel",
+  csv: "CSV",
+  pdf: "PDF",
+  "crm-export": "Exportación del CRM",
+};
+
+/** "trabajaEnTurno" → "trabaja en turno" */
+export function humanizar(predicado: string): string {
+  return predicado
+    .replace(/([a-záéíóúñ])([A-ZÁÉÍÓÚÑ])/g, "$1 $2")
+    .replace(/_/g, " ")
+    .toLowerCase();
+}
+
 function Detalle({ req }: { req: RequerimientoMotor }) {
   return (
     <>
-      <Seccion titulo="Necesidad">{req.necesidad}</Seccion>
-      <Seccion titulo="Decisión objetivo">{req.decision_objetivo}</Seccion>
-      <Seccion titulo="Alcance">
-        {req.alcance.periodo}
-        {req.alcance.unidades.length > 0 && (
-          <span className="text-muted-foreground"> · {req.alcance.unidades.join(", ")}</span>
-        )}
-      </Seccion>
-      <Seccion titulo="Clases">
-        <span className="font-mono">{req.esquema.clases.join(" · ")}</span>
-      </Seccion>
-      {req.esquema.relaciones.length > 0 && (
-        <Seccion titulo="Relaciones">
-          <ul className="space-y-1 font-mono text-xs">
-            {req.esquema.relaciones.map((r, i) => (
-              <li key={i}>
-                {r.sujeto} <span className="text-muted-foreground">—{r.predicado}→</span> {r.objeto}
-              </li>
-            ))}
-          </ul>
+      <div className="space-y-3">
+        <Seccion titulo="Qué querés decidir">{req.decision_objetivo}</Seccion>
+        <Seccion titulo="El problema">{req.necesidad}</Seccion>
+        <Seccion titulo="Período a analizar">
+          {req.alcance.periodo}
+          {req.alcance.unidades.length > 0 && (
+            <span className="text-muted-foreground"> · {req.alcance.unidades.join(", ")}</span>
+          )}
         </Seccion>
-      )}
-      {req.reglas_candidatas.length > 0 && (
-        <Seccion titulo="Reglas candidatas">
-          <ul className="space-y-2">
-            {req.reglas_candidatas.map((r) => (
-              <li key={r.id} className="flex gap-2">
-                <span className="font-mono text-xs font-semibold">{r.id}</span>
-                <span>{r.enunciado}</span>
-              </li>
-            ))}
-          </ul>
-        </Seccion>
-      )}
-      <Seccion titulo="Fuentes requeridas">
+      </div>
+
+      <Seccion
+        titulo={`Datos que hay que traer (${req.fuentes_requeridas.length} ${
+          req.fuentes_requeridas.length === 1 ? "archivo" : "archivos"
+        })`}
+      >
         {req.fuentes_requeridas.length === 0 ? (
-          <span className="text-muted-foreground">Ninguna todavía.</span>
+          <span className="text-muted-foreground">Todavía ninguno.</span>
         ) : (
           <div className="space-y-2">
             {req.fuentes_requeridas.map((f, i) => (
               <Tarjeta key={i}>
                 <div className="flex items-baseline justify-between gap-2">
                   <span className="font-semibold">{f.nombre}</span>
-                  <span className="font-mono text-xs text-muted-foreground">{f.tipo}</span>
+                  <span className="rounded-md border px-1.5 py-0.5 text-xs text-muted-foreground">
+                    {TIPO_LEGIBLE[f.tipo] ?? f.tipo}
+                  </span>
                 </div>
-                <ul className="mt-2 space-y-1">
+                <p className="mt-2 text-xs text-muted-foreground">Columnas mínimas:</p>
+                <ul className="mt-1 space-y-1.5">
                   {f.columnas_minimas.map((c, j) => (
-                    <li key={j} className="flex flex-wrap items-baseline gap-x-2 font-mono text-xs">
-                      <span>{c.nombre}</span>
-                      <span className="text-muted-foreground">← {c.justifica.join(", ")}</span>
+                    <li key={j}>
+                      <span className="font-mono text-xs font-medium">{c.nombre}</span>
+                      <span className="text-xs text-muted-foreground"> · para {c.justifica.join(", ")}</span>
                     </li>
                   ))}
                 </ul>
-                <div className="mt-2 text-xs text-muted-foreground">Justifica: {f.justifica.join(", ")}</div>
               </Tarjeta>
             ))}
           </div>
         )}
       </Seccion>
+
+      {req.reglas_candidatas.length > 0 && (
+        <Seccion titulo="Qué va a verificar el motor con esos datos">
+          <ul className="space-y-2">
+            {req.reglas_candidatas.map((r) => (
+              <li key={r.id} className="flex gap-2">
+                <span className="shrink-0 rounded-md border px-1.5 font-mono text-xs leading-5 font-semibold">{r.id}</span>
+                <span>{r.enunciado}</span>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-2 text-xs text-muted-foreground">
+            Son hipótesis: el motor las comprueba con tus datos reales. El agente no afirma que se cumplan.
+          </p>
+        </Seccion>
+      )}
+
       {req.preguntas_abiertas.length > 0 && (
-        <Seccion titulo="Preguntas abiertas">
+        <Seccion titulo="Falta definir">
           <ul className="list-disc space-y-1 pl-4">
             {req.preguntas_abiertas.map((p, i) => (
               <li key={i}>{p}</li>
@@ -235,17 +250,50 @@ function Detalle({ req }: { req: RequerimientoMotor }) {
           </ul>
         </Seccion>
       )}
-      <Seccion titulo="Completitud">
-        <span
-          className={cn(
-            "rounded-md px-2 py-0.5 text-xs",
-            req.completitud === "suficiente_para_confirmar" ? "border font-semibold" : "border border-dashed",
+
+      <div className="space-y-2 border-t pt-4">
+        <Desplegable titulo="Ver el modelo (entidades y relaciones)">
+          <Seccion titulo="Entidades">
+            <div className="flex flex-wrap gap-1.5">
+              {req.esquema.clases.map((c) => (
+                <span key={c} className="rounded-md border px-2 py-0.5 text-xs">
+                  {c}
+                </span>
+              ))}
+            </div>
+          </Seccion>
+          {req.esquema.relaciones.length > 0 && (
+            <Seccion titulo="Cómo se relacionan">
+              <ul className="space-y-1">
+                {req.esquema.relaciones.map((r, i) => (
+                  <li key={i}>
+                    <span className="font-medium">{r.sujeto}</span>{" "}
+                    <span className="text-muted-foreground">{humanizar(r.predicado)}</span>{" "}
+                    <span className="font-medium">{r.objeto}</span>
+                  </li>
+                ))}
+              </ul>
+            </Seccion>
           )}
-        >
-          {req.completitud === "suficiente_para_confirmar" ? "Suficiente para confirmar" : "Faltan datos"}
-        </span>
-      </Seccion>
+        </Desplegable>
+        <Desplegable titulo="Ver el requerimiento en JSON (para el motor)">
+          <pre className="overflow-x-auto rounded-md bg-muted p-3 font-mono text-xs leading-relaxed">
+            {JSON.stringify(req, null, 2)}
+          </pre>
+        </Desplegable>
+      </div>
     </>
+  );
+}
+
+function Desplegable({ titulo, children }: { titulo: string; children: ReactNode }) {
+  return (
+    <details className="group rounded-xl border border-dashed px-4 py-2 open:border-solid">
+      <summary className="cursor-pointer text-xs text-muted-foreground select-none group-open:font-medium group-open:text-foreground">
+        {titulo}
+      </summary>
+      <div className="mt-3 space-y-3 pb-2">{children}</div>
+    </details>
   );
 }
 
