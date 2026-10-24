@@ -9,6 +9,7 @@ Chat que entrevista al usuario sobre un problema de negocio, propone un modelo (
 | Entrevista al usuario con pocas preguntas: qué decisión quiere tomar, sobre qué entidades, en qué período y con qué sospecha. | No lee, carga ni simula datos de la empresa. |
 | Propone un modelo: clases, relaciones y reglas candidatas que el motor podría verificar. | No calcula cifras ni da conclusiones ("la causa es X"): eso sale del motor con los datos reales. |
 | Especifica qué archivos y columnas mínimas hay que cargar, cada una justificada. | No decide qué es verdad: solo deja hipótesis verificables. |
+| Deja descargar una plantilla CSV por archivo y la tabla completa del requerimiento, para ir a buscar los datos. | No carga ni valida archivos (fuera de alcance). |
 
 En el flujo de Trama cubre los pasos **1. Plantear necesidad** y **2. Determinar datos**. El requerimiento confirmado es la entrada del paso 3 (modelar y cargar).
 

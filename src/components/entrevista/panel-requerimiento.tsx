@@ -1,10 +1,12 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
+import { Download } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import type { EstadoEntrevista, RequerimientoMotor } from "@/lib/interview/contract";
 import { cn } from "@/lib/utils";
+import { descargarPlantilla, descargarRequerimiento, explicarReferencias, TIPO_LEGIBLE } from "./exportar";
 
 type Props = {
   estado: EstadoEntrevista;
@@ -164,13 +166,6 @@ function Tarjeta({ children, className }: { children: ReactNode; className?: str
   return <div className={cn("rounded-xl p-4 ring-1 ring-foreground/10", className)}>{children}</div>;
 }
 
-const TIPO_LEGIBLE: Record<string, string> = {
-  excel: "Excel",
-  csv: "CSV",
-  pdf: "PDF",
-  "crm-export": "Exportación del CRM",
-};
-
 /** "trabajaEnTurno" → "trabaja en turno" */
 export function humanizar(predicado: string): string {
   return predicado
@@ -201,26 +196,51 @@ function Detalle({ req }: { req: RequerimientoMotor }) {
         {req.fuentes_requeridas.length === 0 ? (
           <span className="text-muted-foreground">Todavía ninguno.</span>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-3">
             {req.fuentes_requeridas.map((f, i) => (
-              <Tarjeta key={i}>
-                <div className="flex items-baseline justify-between gap-2">
-                  <span className="font-semibold">{f.nombre}</span>
-                  <span className="rounded-md border px-1.5 py-0.5 text-xs text-muted-foreground">
-                    {TIPO_LEGIBLE[f.tipo] ?? f.tipo}
-                  </span>
+              <Tarjeta key={i} className="overflow-hidden p-0">
+                <div className="flex items-center justify-between gap-2 px-4 pt-3 pb-2">
+                  <div className="flex min-w-0 items-baseline gap-2">
+                    <span className="truncate font-semibold">{f.nombre}</span>
+                    <span className="shrink-0 rounded-md border px-1.5 py-0.5 text-xs text-muted-foreground">
+                      {TIPO_LEGIBLE[f.tipo] ?? f.tipo}
+                    </span>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="shrink-0 text-xs"
+                    onClick={() => descargarPlantilla(f)}
+                    title="Descarga un CSV con estas columnas como encabezado"
+                  >
+                    <Download className="size-3.5" />
+                    Plantilla
+                  </Button>
                 </div>
-                <p className="mt-2 text-xs text-muted-foreground">Columnas mínimas:</p>
-                <ul className="mt-1 space-y-1.5">
-                  {f.columnas_minimas.map((c, j) => (
-                    <li key={j}>
-                      <span className="font-mono text-xs font-medium">{c.nombre}</span>
-                      <span className="text-xs text-muted-foreground"> · para {c.justifica.join(", ")}</span>
-                    </li>
-                  ))}
-                </ul>
+                <table className="w-full table-fixed text-left text-xs">
+                  <thead>
+                    <tr className="border-y bg-muted/50 text-muted-foreground">
+                      <th className="w-2/5 px-4 py-1.5 font-medium">Columna</th>
+                      <th className="px-4 py-1.5 font-medium">Para qué se usa</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {f.columnas_minimas.map((c, j) => (
+                      <tr key={j} className="border-b last:border-b-0">
+                        <td className="px-4 py-1.5 align-top font-mono font-medium break-words">{c.nombre}</td>
+                        <td className="px-4 py-1.5 align-top text-muted-foreground" title={explicarReferencias(c.justifica, req)}>
+                          {c.justifica.join(", ")}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </Tarjeta>
             ))}
+            <Button variant="outline" size="sm" className="w-full" onClick={() => descargarRequerimiento(req)}>
+              <Download />
+              Descargar la tabla completa (CSV)
+            </Button>
           </div>
         )}
       </Seccion>

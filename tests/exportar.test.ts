@@ -25,3 +25,28 @@ describe("humanizar", () => {
     expect(humanizar("asignado_a")).toBe("asignado a");
   });
 });
+
+describe("tablas CSV", () => {
+  it("la plantilla de un archivo trae solo los encabezados, con BOM y separador ;", async () => {
+    const { plantillaCsv } = await import("@/components/entrevista/exportar");
+    const csv = plantillaCsv(requerimientoValido().fuentes_requeridas[0]);
+    expect(csv).toBe("﻿empleado_id;area;fecha_salida;motivo_salida\r\n");
+  });
+
+  it("la tabla completa tiene una fila por columna y explica las reglas", async () => {
+    const { requerimientoCsv } = await import("@/components/entrevista/exportar");
+    const req = requerimientoValido();
+    const filas = requerimientoCsv(req).replace("﻿", "").trim().split("\r\n");
+    const total = req.fuentes_requeridas.reduce((n, f) => n + f.columnas_minimas.length, 0);
+    expect(filas).toHaveLength(total + 1);
+    expect(filas[0]).toBe("Archivo;Tipo;Columna;Para qué se usa");
+    expect(filas[3]).toContain("Nómina;Excel;fecha_salida;Salida | R1: Si un Empleado cambió de Turno");
+  });
+
+  it("escapa valores con separador o comillas", async () => {
+    const { requerimientoCsv } = await import("@/components/entrevista/exportar");
+    const req = requerimientoValido();
+    req.fuentes_requeridas[0].nombre = 'Nómina; "2026"';
+    expect(requerimientoCsv(req)).toContain('"Nómina; ""2026"""');
+  });
+});
