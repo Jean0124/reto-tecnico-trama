@@ -43,7 +43,8 @@ export type EventoTurno =
   | { tipo: "contexto_actualizado" }
   | { tipo: "requerimiento_registrado"; version: number }
   | { tipo: "requerimiento_invalido"; errores: string[] }
-  | { tipo: "cifras_bloqueadas"; cifras: string[] };
+  | { tipo: "cifras_bloqueadas"; cifras: string[] }
+  | { tipo: "cambio_sin_registrar" };
 
 export type ResultadoTurno = {
   respuesta: string;
@@ -92,6 +93,8 @@ export async function ejecutarTurno(params: {
   let respuesta: string | null = null;
   /** Respuestas vacías (sin texto ni herramientas) ya reintentadas en este turno. */
   let vacias = 0;
+  /** El modelo dijo que cambió el requerimiento sin registrarlo: se lo obliga a registrar (una vez). */
+  let accionSinRegistro = false;
 
   for (let paso = 0; paso < MAX_PASOS; paso++) {
     if (signal?.aborted) throw new ErrorLLM("timeout", "Se agotó el tiempo del turno");
@@ -103,15 +106,18 @@ export async function ejecutarTurno(params: {
 
     let eleccion: EleccionHerramienta = "auto";
     if (registroEnEsteTurno || agotoIntentos) eleccion = "ninguna";
-    else if (debeForzarRegistro(estado) || forzarPorVacia) eleccion = { nombre: "registrar_requerimiento" };
+    else if (debeForzarRegistro(estado) || forzarPorVacia || accionSinRegistro)
+      eleccion = { nombre: "registrar_requerimiento" };
 
     const nota = agotoIntentos
       ? `El requerimiento no pasó la validación del servidor y NO se mostró al usuario. Errores: ${ultimosErrores.join("; ")}. No vuelvas a registrarlo en este turno: pedile al usuario, en una o dos preguntas, la información que falta para resolverlo.`
       : registroEnEsteTurno
         ? "El requerimiento quedó registrado y ya se ve en el panel. Ahora respondé al usuario en 1 o 2 frases: qué propusiste y que lo revise para confirmarlo o pedir ajustes."
-        : vacias > 0
-          ? "Tu respuesta anterior llegó vacía. Respondé ahora: llamá a la herramienta que corresponda o escribile al usuario en 1 o 2 frases."
-          : undefined;
+        : accionSinRegistro
+          ? "Le dijiste al usuario que cambiaste el requerimiento, pero no llamaste a registrar_requerimiento, así que el panel no cambió. Registrá ahora la versión completa con ese cambio."
+          : vacias > 0
+            ? "Tu respuesta anterior llegó vacía. Respondé ahora: llamá a la herramienta que corresponda o escribile al usuario en 1 o 2 frases."
+            : undefined;
 
     const res = await llm.completar({
       sistema: construirPromptSistema(estado, nota),
@@ -125,6 +131,19 @@ export async function ejecutarTurno(params: {
     if (res.llamadas.length === 0 && !texto && vacias < 1) {
       // Respuesta vacía (pasa con algunos modelos que "razonan" y no escriben nada): un reintento.
       vacias += 1;
+      continue;
+    }
+    if (
+      res.llamadas.length === 0 &&
+      texto &&
+      fase === "revisar" &&
+      !registroEnEsteTurno &&
+      !accionSinRegistro &&
+      afirmaCambio(texto)
+    ) {
+      // "Actualicé la fuente…" sin haber registrado nada: el panel quedaría desactualizado.
+      accionSinRegistro = true;
+      eventos.push({ tipo: "cambio_sin_registrar" });
       continue;
     }
     if (res.llamadas.length === 0 || eleccion === "ninguna") {
@@ -255,6 +274,13 @@ async function vigilarCifras(
   const texto = reintento.texto?.trim() ?? "";
   if (texto && cifrasNoAportadas(texto, textoUsuario).length === 0) return texto;
   return null;
+}
+
+/** El texto afirma haber modificado el requerimiento (actualicé, cambié, agregué…). */
+export function afirmaCambio(texto: string): boolean {
+  return /\b(actualic|actualizo|actualizad|cambi[eé]|cambio la|cambiad|modifiqu|modifico|modificad|agregu[eé]|agrego|añad[ií]|ajust[eé]|ajusto|correg[ií]|quit[eé]|elimin[eé]|reemplac[eé]|sum[eé])/i.test(
+    texto,
+  );
 }
 
 function respuestaDeRespaldo(estado: EstadoEntrevista): string {

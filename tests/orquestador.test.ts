@@ -179,6 +179,36 @@ describe("ejecutarTurno", () => {
     expect(r.respuesta.length).toBeGreaterThan(10);
   });
 
+  it("si dice que actualizó el requerimiento sin registrarlo, lo obliga a registrar la nueva versión", async () => {
+    const v2 = requerimientoValido();
+    v2.fuentes_requeridas[1].tipo = "crm-export";
+    const llm = new ClienteGuionado([
+      texto("Perfecto, actualizo la fuente a CRM-export."),
+      herramienta("registrar_requerimiento", v2),
+      texto("Listo, la v2 ya está en el panel."),
+    ]);
+    const r = await ejecutarTurno({
+      llm,
+      mensajes: conversacion(TEXTO_USUARIO, "Revisalo en el panel.", "Los turnos salen del CRM"),
+      estado: estadoDelimitado({ versiones: [requerimientoValido()] }),
+    });
+    expect(llm.peticiones[1].eleccion).toEqual({ nombre: "registrar_requerimiento" });
+    expect(r.estado.versiones).toHaveLength(2);
+    expect(r.eventos[0]).toEqual({ tipo: "cambio_sin_registrar" });
+    expect(r.respuesta).toBe("Listo, la v2 ya está en el panel.");
+  });
+
+  it("en revisión, una respuesta que no afirma cambios no fuerza un registro", async () => {
+    const llm = new ClienteGuionado([texto("Sí, R1 usa la fecha de salida. ¿Querés confirmarlo?")]);
+    const r = await ejecutarTurno({
+      llm,
+      mensajes: conversacion(TEXTO_USUARIO, "Revisalo.", "¿Qué usa la R1?"),
+      estado: estadoDelimitado({ versiones: [requerimientoValido()] }),
+    });
+    expect(llm.peticiones).toHaveLength(1);
+    expect(r.estado.versiones).toHaveLength(1);
+  });
+
   it("no muta el estado recibido", async () => {
     const estado = estadoDelimitado();
     const copia = structuredClone(estado);

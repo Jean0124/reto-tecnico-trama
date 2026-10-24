@@ -2,7 +2,18 @@
 
 Chat que entrevista al usuario sobre un problema de negocio, propone un modelo (clases, relaciones y reglas candidatas) y deja especificado, con un objeto tipado y validado en el servidor, qué datos necesita el motor de inferencia. El usuario revisa el requerimiento en un panel y lo confirma o pide ajustes.
 
-- **Demo:** `<URL de Vercel>`
+### Qué hace y qué no
+
+| Hace | No hace |
+|---|---|
+| Entrevista al usuario con pocas preguntas: qué decisión quiere tomar, sobre qué entidades, en qué período y con qué sospecha. | No lee, carga ni simula datos de la empresa. |
+| Propone un modelo: clases, relaciones y reglas candidatas que el motor podría verificar. | No calcula cifras ni da conclusiones ("la causa es X"): eso sale del motor con los datos reales. |
+| Especifica qué archivos y columnas mínimas hay que cargar, cada una justificada. | No decide qué es verdad: solo deja hipótesis verificables. |
+
+En el flujo de Trama cubre los pasos **1. Plantear necesidad** y **2. Determinar datos**. El requerimiento confirmado es la entrada del paso 3 (modelar y cargar).
+
+- **Demo:** https://reto-tecnico-trama.vercel.app
+- **Repo:** https://github.com/Jean0124/reto-tecnico-trama
 - **Diseño de la entrevista:** [DESIGN.md](./DESIGN.md)
 - **Transcripciones de prueba:** [`transcripciones/`](./transcripciones)
 
@@ -76,6 +87,8 @@ e2e/                         ← Playwright
 - **Tool call inválida:** el modelo recibe los errores y corrige (2 intentos); si no, no se muestra nada y el agente pide lo que falta.
 - **JSON mal formado** en los argumentos: se trata igual que un requerimiento inválido.
 - **Tool fuera de fase:** se rechaza y se le avisa al modelo.
+- **Respuesta vacía del modelo:** se reintenta una vez; en la fase de proponer se fuerza el registro.
+- **"Actualicé el requerimiento" sin registrarlo:** si en revisión el modelo afirma un cambio sin llamar a la tool, se lo obliga a registrar la nueva versión, para que el panel nunca contradiga al chat (caso encontrado probando con el modelo real).
 - **Timeouts y errores de la API:** 20 s por llamada al modelo (1 reintento), tope de 55 s por turno completo (por debajo del `maxDuration` de 60 s de la ruta) y 150 s en el cliente. Los errores se traducen a mensajes claros (504/502/503) y **el mensaje del usuario vuelve al cuadro de texto** para reintentar.
 - **Abuso:** contraseña opcional, límite por IP, máximo de 40 mensajes por conversación y de 4000 caracteres por mensaje, `max_completion_tokens` acotado.
 - **La key:** solo en variables de entorno del servidor. `openai.ts` importa `server-only` (si un componente cliente lo importara, el build falla) y un test verifica que ningún componente cliente la toque.
@@ -107,8 +120,8 @@ e2e/                         ← Playwright
 
 ## Entrega
 
-- [ ] URL de Vercel
-- [ ] Repo con commits convencionales
+- [x] URL de Vercel
+- [x] Repo con commits convencionales
 - [x] DESIGN.md
 - [ ] Tres transcripciones en `transcripciones/` (botón "Exportar transcripción" en la app)
 - [ ] Video o GIF del flujo completo

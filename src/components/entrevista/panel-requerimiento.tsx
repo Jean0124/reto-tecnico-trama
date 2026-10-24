@@ -38,8 +38,15 @@ export function PanelRequerimiento({ estado, onConfirmar, onAjustar }: Props) {
       {!req ? (
         <div className="flex-1 overflow-y-auto p-6">
           <div className="rounded-xl border border-dashed p-4 text-sm text-muted-foreground">
-            Todavía no hay requerimiento. El agente lo propone acá cuando entiende la necesidad: qué decisión querés
-            tomar, sobre qué entidades y en qué período.
+            <p className="font-medium text-foreground">Acá va a aparecer tu requerimiento de datos.</p>
+            <p className="mt-1">
+              Es la lista de lo que habría que cargar en Trama para analizar tu problema: el modelo (clases, relaciones y
+              reglas a verificar) y los archivos con las columnas mínimas, cada una justificada. Lo revisás, pedís
+              ajustes y lo confirmás.
+            </p>
+            <p className="mt-1">
+              El agente lo propone cuando entiende qué decisión querés tomar, sobre qué entidades y en qué período.
+            </p>
           </div>
           <ContextoParcial estado={estado} />
         </div>

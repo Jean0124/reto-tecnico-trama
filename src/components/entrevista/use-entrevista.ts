@@ -13,7 +13,7 @@ const TIMEOUT_CLIENTE_MS = 150_000;
 export const SALUDO: MensajeChat = {
   rol: "agente",
   contenido:
-    "Hola, soy el agente de entrada de Trama. Contame qué problema o pregunta de negocio querés resolver, con tus palabras. Con eso armamos juntos qué datos hacen falta.",
+    "Hola, soy el agente de entrada de Trama. Te hago unas pocas preguntas sobre un problema de tu negocio y te propongo qué datos habría que cargar para analizarlo: qué archivos, qué columnas y para qué sirve cada una. No analizo datos ni doy resultados; eso lo hace el motor de Trama después, con tus datos reales.\n\nContame con tus palabras qué está pasando. Por ejemplo: \"se nos está yendo gente de operaciones\" o \"el inventario no cuadra\".",
 };
 
 type Guardado = { mensajes: MensajeChat[]; estado: EstadoEntrevista };
