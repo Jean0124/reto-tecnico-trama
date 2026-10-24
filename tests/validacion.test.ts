@@ -70,6 +70,28 @@ describe("validarRequerimiento", () => {
   });
 });
 
+describe("reglas verificables", () => {
+  it.each([
+    "Si una ruta tiene muchas paradas, podría estar afectando la puntualidad.",
+    "Si un pedido tiene un reclamo, indica insatisfacción.",
+    "Si una devolución no está registrada, se marca como posible causa.",
+    "Si los reclamos aumentan de forma significativa, se marca.",
+  ])("rechaza conclusiones o especulación: %s", (enunciado) => {
+    const req = requerimientoValido();
+    req.reglas_candidatas[0].enunciado = enunciado;
+    const r = validarRequerimiento(req, TEXTO_USUARIO);
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.errores.join()).toContain("no es verificable");
+  });
+
+  it("acepta condiciones observables con umbral parametrizado", () => {
+    const req = requerimientoValido();
+    req.reglas_candidatas[0].enunciado =
+      "Si la hora real de entrega de un Pedido supera la hora prometida en más de N minutos, se marca el pedido como retrasado.";
+    expect(validarRequerimiento(req, TEXTO_USUARIO).ok).toBe(true);
+  });
+});
+
 describe("cifrasNoAportadas", () => {
   it("permite cifras que el usuario mencionó", () => {
     expect(cifrasNoAportadas("Mencionaste un 12 % de rotación", "tenemos 12% de rotación")).toEqual([]);

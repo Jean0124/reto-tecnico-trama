@@ -37,6 +37,10 @@ const norm = (s: string) =>
     .trim()
     .toLowerCase();
 
+/** Palabras que convierten una regla en conclusión o especulación (no verificable por el motor). */
+export const REGLA_VAGA =
+  /\b(podr[ií]an?|puede[n]? (?:indicar|afectar|ser|estar)|indica(?:r[ií]a)?|posible(?:s)? causas?|es (?:la )?causa|probablemente|quiz[aá]s?|significativ[oa]s?|no (?:est[aá]n? |fue |es )?registrad[oa]s?)\b/i;
+
 export function validarCoherencia(req: RequerimientoMotor): string[] {
   const errores: string[] = [];
   const clases = new Set(req.esquema.clases.map(norm));
@@ -48,6 +52,15 @@ export function validarCoherencia(req: RequerimientoMotor): string[] {
       errores.push(`esquema.relaciones[${i}]: el sujeto "${r.sujeto}" no está en esquema.clases`);
     if (!clases.has(norm(r.objeto)))
       errores.push(`esquema.relaciones[${i}]: el objeto "${r.objeto}" no está en esquema.clases`);
+  });
+
+  // Una regla es una condición verificable, no una conclusión ni una especulación.
+  req.reglas_candidatas.forEach((r) => {
+    const vaga = r.enunciado.match(REGLA_VAGA);
+    if (vaga)
+      errores.push(
+        `reglas_candidatas ${r.id}: "${vaga[0]}" no es verificable. Escribila como "Si <condición observable en los datos>, entonces se marca <hecho>", sin conclusiones ni especulación`,
+      );
   });
 
   const ids = req.reglas_candidatas.map((r) => r.id);
