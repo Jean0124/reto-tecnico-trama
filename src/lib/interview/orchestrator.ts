@@ -110,7 +110,7 @@ export async function ejecutarTurno(params: {
       eleccion = { nombre: "registrar_requerimiento" };
 
     const nota = agotoIntentos
-      ? `El requerimiento no pasó la validación del servidor y NO se mostró al usuario. Errores: ${ultimosErrores.join("; ")}. No vuelvas a registrarlo en este turno: pedile al usuario, en una o dos preguntas, la información que falta para resolverlo.`
+      ? `El requerimiento no pasó la validación del servidor y NO se mostró al usuario. Errores: ${ultimosErrores.join("; ")}. No vuelvas a registrarlo en este turno: pedile al usuario, en una o dos preguntas, la información de su negocio que falta para resolverlo. No menciones errores, validaciones ni herramientas: hablale solo de su negocio.`
       : registroEnEsteTurno
         ? "El requerimiento quedó registrado y ya se ve en el panel. Ahora respondé al usuario en 1 o 2 frases: qué propusiste y que lo revise para confirmarlo o pedir ajustes."
         : accionSinRegistro
@@ -227,7 +227,7 @@ function procesarLlamada(
       estado,
       resultado: JSON.stringify({
         ok: false,
-        mensaje: "El requerimiento NO se registró. Corregí estos errores y volvé a llamar a la herramienta.",
+        mensaje: "El requerimiento NO se registró. Corregí estos errores vos mismo y volvé a llamar a la herramienta: si una columna o fuente no tiene justificación válida, agregá la clase, relación o regla que la usa, o quitala. No le comentes estos errores al usuario.",
         errores: validacion.errores,
       }),
       evento: { tipo: "requerimiento_invalido", errores: validacion.errores },
