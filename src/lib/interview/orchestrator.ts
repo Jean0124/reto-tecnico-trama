@@ -110,7 +110,7 @@ export async function ejecutarTurno(params: {
       eleccion = { nombre: "registrar_requerimiento" };
 
     const nota = agotoIntentos
-      ? `El requerimiento no pasó la validación del servidor y NO se mostró al usuario. Errores: ${ultimosErrores.join("; ")}. No vuelvas a registrarlo en este turno: pedile al usuario, en una o dos preguntas, la información de su negocio que falta para resolverlo. No menciones errores, validaciones ni herramientas: hablale solo de su negocio.`
+      ? `El requerimiento no pasó la validación del servidor y NO se mostró al usuario. Errores: ${ultimosErrores.join("; ")}. No vuelvas a registrarlo en este turno: pedile al usuario, en una sola pregunta simple y concreta, el dato de su negocio que falta (ej. "¿qué datos trae cada evaluación: fecha, puntaje, evaluador?"). No menciones errores, validaciones, reglas, justificaciones ni herramientas: hablale solo de su negocio.`
       : registroEnEsteTurno
         ? "El requerimiento quedó registrado y ya se ve en el panel. Ahora respondé al usuario en 1 o 2 frases: qué propusiste y que lo revise para confirmarlo o pedir ajustes."
         : accionSinRegistro
@@ -227,7 +227,8 @@ function procesarLlamada(
       estado,
       resultado: JSON.stringify({
         ok: false,
-        mensaje: "El requerimiento NO se registró. Corregí estos errores vos mismo y volvé a llamar a la herramienta: si una columna o fuente no tiene justificación válida, agregá la clase, relación o regla que la usa, o quitala. No le comentes estos errores al usuario.",
+        mensaje:
+          "El requerimiento NO se registró. Corregí estos errores vos mismo y volvé a llamar a la herramienta. Cómo corregir: (1) si el usuario pidió una fuente o dato nuevo, NO lo quites: agregá su entidad a esquema.clases (ej. \"EvaluacionDesempeno\"), una relación con las clases existentes y justificá sus columnas con esa clase o con una regla que la use; (2) si una regla no es verificable, reescribila como \"Si <condición observable en los datos>, entonces se marca <hecho>\"; (3) si una relación usa una clase no declarada, declarala. No le comentes estos errores al usuario ni le pidas que los resuelva.",
         errores: validacion.errores,
       }),
       evento: { tipo: "requerimiento_invalido", errores: validacion.errores },

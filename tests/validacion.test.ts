@@ -76,6 +76,8 @@ describe("reglas verificables", () => {
     "Si un pedido tiene un reclamo, indica insatisfacción.",
     "Si una devolución no está registrada, se marca como posible causa.",
     "Si los reclamos aumentan de forma significativa, se marca.",
+    "Si una ruta tiene más de 15 paradas, se marca como ruta posiblemente demasiado larga.",
+    "Si un repartidor tiene rutas largas, se marca saturación potencial.",
   ])("rechaza conclusiones o especulación: %s", (enunciado) => {
     const req = requerimientoValido();
     req.reglas_candidatas[0].enunciado = enunciado;
