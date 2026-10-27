@@ -1,8 +1,8 @@
 # Transcripción — entrevista Trama
 
-Fecha: 2026-10-27T02:25:11.426Z  
+Fecha: 2026-10-27T02:58:32.834Z  
 Estado: confirmado  
-Versiones del requerimiento: 2
+Versiones del requerimiento: 8
 
 ## Conversación
 
@@ -12,50 +12,64 @@ Contame con tus palabras qué está pasando. Por ejemplo: "se nos está yendo ge
 
 **Usuario:** Se nos está yendo mucha gente de operaciones y no sabemos por qué.
 
-**Agente:** Gracias por contarme. ¿Querés tomar la decisión de identificar las causas de la rotación en operaciones o prefieren focalizar en algún punto como evaluar jefaturas, condiciones de turnos o salarios? También necesito saber el período en el que notaron esa rotación.
+**Agente:** Entiendo que querés entender por qué se va gente de operaciones. ¿Qué decisión querés tomar para resolver ese problema? Por ejemplo, elegir entre mejorar condiciones, cambiar líderes o ajustar procesos. Además, ¿en qué período pasó esto y en qué unidades o áreas de operaciones?
 
 **Usuario:** Queremos decidir si cambiamos el esquema de turnos rotativos o si cambiamos a algunos supervisores.
 
-**Agente:** Perfecto, entonces la decisión es entre cambiar turnos o cambiar supervisores para frenar la rotación en operaciones. ¿Desde cuándo vienen notando esa rotación alta? ¿Podés decirme un período aproximado para analizar?
+**Agente:** Gracias, entonces la decisión es entre modificar los turnos rotativos o cambiar supervisores. Para seguir, ¿en qué período notaron esta salida de gente? ¿Y de qué unidades o áreas específicas de operaciones se trata?
 
-**Usuario:** mpezó hace unos 8 meses. Sospechamos que la gente renuncia después de que la pasan al turno de noche.
+**Usuario:** Empezó hace unos 8 meses. Sospechamos que la gente renuncia después de que la pasan al turno de noche.
 
-**Agente:** Gracias, ya tengo el contexto: quieren decidir entre cambios en turnos rotativos o en supervisores para frenar la rotación en operaciones de los últimos 8 meses, sospechando que renuncian tras pasar al turno de noche.
-
-Para avanzar, ¿ustedes registran en sus sistemas el cambio de turno de cada colaborador y también registran quién supervisa a cada colaborador en operaciones?
+**Agente:** Ya está listo el requerimiento con el detalle completo de clases, relaciones, reglas, fuentes y preguntas abiertas. Por favor revisalo en el panel y confirmá o pedime algún ajuste.
 
 **Usuario:** Tenemos la nómina en Excel con fecha de ingreso, fecha de salida y motivo de salida. Las asignaciones de turno y supervisor están en un CSV con fechas desde y hasta.
 
-**Agente:** Propuse un requerimiento para analizar la rotación por cambios a turno noche y supervisores en operaciones de los últimos 8 meses, con datos de nómina y asignaciones de turno y supervisor. Revisalo en el panel y confirmá o pedí ajustes. ¿Querés definir cuántos días considerar para la renuncia tras cambio a turno noche?
+**Agente:** Entendido, entonces hay dos fuentes: una nómina en Excel con ingreso, salida y motivo, y un CSV con asignaciones de turnos y supervisores con fechas. ¿Querés incluir el motivo de salida para analizar qué causas están vinculadas a la renuncia? ¿Y las fechas de cambio de turno y supervisor están precisas y completas en ese CSV?
 
-**Usuario:** ¿Entonces la causa son los turnos de noche, cierto?
+**Usuario:** si existe un registro de turno y fechas precisas
 
-**Agente:** No afirmo causas; solo propongo que el motor verifique si los colaboradores que cambiaron a turno noche renunciaron dentro de cierto plazo. Vos podés definir ese plazo que el motor usará para buscar esa relación. ¿Querés definir cuánto debería ser ese plazo en días?
+**Agente:** Registré un requerimiento que incluye la nómina con fechas y motivos de salida, más el detalle preciso de turnos y supervisores con fechas. Por favor revisalo en el panel y confirmá o pedime ajustes.
 
-**Usuario:** Quiero ajustar: Quiero ajustar: el motivo de salida es texto libre, no tiene categorías. Y agrega también las evaluaciones de desempeño, las tenemos en PDF
+**Usuario:** para los colaboradores el id_colaborador
 
-**Agente:** Veo que las evaluaciones de desempeño en PDF no tienen columnas mínimas que justifiquen entidades o reglas para este análisis. ¿Querés que prepare el requerimiento sin incluir esas evaluaciones o querés contarme si hay datos en ellas que las vinculen a colaboradores o sus supervisores, para incluirlas mejor?
+**Agente:** El requerimiento está definido con id_colaborador en fuente Nómina y en el CSV de asignaciones, para conectar y analizar cambios de turno y supervisores. Revisalo en el panel y confirmame o pedime ajustes.
 
-**Usuario:** si
+**Usuario:** si la fecha exacta dia mes y año
 
-**Agente:** Veo que las evaluaciones en PDF no tienen campos identificables para este análisis, por lo que no puedo incluirlas como fuente con columnas mínimas. Podemos seguir sin incluirlas por ahora o me decís si tienen datos concretos para vincular a colaboradores o supervisores. ¿Querés que siga sin ellas?
+**Agente:** Perfecto, incluimos que la fecha de renuncia debe estar registrada con día, mes y año exactos. Revisá el detalle en el panel y confirmame si todo está bien o si querés hacer algún cambio.
 
-**Usuario:** si
+**Usuario:** si se registra exacta
 
-**Agente:** Actualicé el requerimiento para incluir que el motivo de salida es texto libre y mantuve las fuentes actuales descartando las evaluaciones en PDF. Además sigue la pregunta abierta sobre cuántos días considerar renuncia tras cambio a turno noche. Revisalo en el panel y confirmá o pedí ajustes.
+**Agente:** Confirmo que el requerimiento incluye la fecha de renuncia registrada con día, mes y año exactos. Revisalo con detalle en el panel y decime si querés hacer algún cambio o lo confirmás.
 
-**Agente:** Listo: confirmaste la versión 2 del requerimiento. Con esto el siguiente paso es cargar esas fuentes en Trama para que el motor las cruce. La entrevista queda cerrada.
+**Usuario:** y no hay acambios
 
-## Requerimiento resultante (versión 2)
+**Agente:** Perfecto, entonces el requerimiento está completo y sin cambios. Cuando quieras, podés confirmarlo con el botón "Confirmar" en el panel para que el motor pueda empezar a trabajar.
+
+**Usuario:** no hay ningun cambio en los supervisores
+
+**Agente:** Quedó registrado que no hay cambios en supervisores en el período. Por favor revisá el requerimiento en el panel y confirmame o pedime ajustes.
+
+**Usuario:** Quiero ajustar: que no hay cambio en los supervisores regitrados en el periodo
+
+**Agente:** Actualicé el requerimiento para expresar que no hay cambios en supervisores registrados en el período. Por favor revisalo en el panel y confirmá o pedime algún ajuste.
+
+**Usuario:** si se marca
+
+**Agente:** Confirmé que el motor marcará el hecho si un colaborador no cambió de supervisor en los últimos 8 meses y renunció. Revisá el requerimiento final en el panel y confirmá para avanzar o pedime ajustes.
+
+**Agente:** Listo: confirmaste la versión 8 del requerimiento. Con esto el siguiente paso es cargar esas fuentes en Trama para que el motor las cruce. La entrevista queda cerrada.
+
+## Requerimiento resultante (versión 8)
 
 ```json
 {
-  "necesidad": "Analizar la rotación en operaciones para decidir entre cambiar turnos rotativos o cambiar supervisores, con sospecha de renuncias tras pasar a turno noche.",
-  "decision_objetivo": "Decidir si cambiar turnos rotativos o cambiar supervisores para frenar rotación en operaciones.",
+  "necesidad": "Entender por qué se va gente de operaciones para decidir entre cambiar turnos o supervisores",
+  "decision_objetivo": "Decidir entre cambiar el esquema de turnos rotativos o cambiar a algunos supervisores",
   "alcance": {
     "periodo": "últimos 8 meses",
     "unidades": [
-      "operaciones"
+      "Operaciones"
     ]
   },
   "esquema": {
@@ -67,12 +81,12 @@ Para avanzar, ¿ustedes registran en sus sistemas el cambio de turno de cada col
     "relaciones": [
       {
         "sujeto": "Colaborador",
-        "predicado": "asignadoATurno",
+        "predicado": "cumpleTurno",
         "objeto": "Turno"
       },
       {
         "sujeto": "Colaborador",
-        "predicado": "supervisadoPor",
+        "predicado": "reportaA",
         "objeto": "Supervisor"
       }
     ]
@@ -80,16 +94,16 @@ Para avanzar, ¿ustedes registran en sus sistemas el cambio de turno de cada col
   "reglas_candidatas": [
     {
       "id": "R1",
-      "enunciado": "Si un colaborador cambió de turno al turno noche y renunció dentro de N días, se marca ese hecho."
+      "enunciado": "Si un colaborador cambió a turno noche en los últimos 8 meses y renunció, se marca el hecho"
     },
     {
       "id": "R2",
-      "enunciado": "Si un colaborador está asignado a un supervisor con alta rotación en sus colaboradores, se marca ese hecho."
+      "enunciado": "Si un colaborador no cambió de supervisor en los últimos 8 meses y renunció, se marca el hecho"
     }
   ],
   "fuentes_requeridas": [
     {
-      "nombre": "Nómina de Colaboradores",
+      "nombre": "Nómina de colaboradores",
       "tipo": "excel",
       "columnas_minimas": [
         {
@@ -107,7 +121,7 @@ Para avanzar, ¿ustedes registran en sus sistemas el cambio de turno de cada col
           ]
         },
         {
-          "nombre": "fecha_salida",
+          "nombre": "fecha_renuncia",
           "justifica": [
             "R1",
             "R2"
@@ -127,38 +141,58 @@ Para avanzar, ¿ustedes registran en sus sistemas el cambio de turno de cada col
       ]
     },
     {
-      "nombre": "Asignaciones de Turno y Supervisor",
+      "nombre": "Asignaciones de turnos y supervisores",
       "tipo": "csv",
       "columnas_minimas": [
         {
           "nombre": "id_colaborador",
           "justifica": [
             "R1",
-            "R2"
+            "R2",
+            "cumpleTurno",
+            "reportaA"
           ]
         },
         {
-          "nombre": "turno",
+          "nombre": "turno_id",
+          "justifica": [
+            "R1",
+            "cumpleTurno"
+          ]
+        },
+        {
+          "nombre": "fecha_inicio_turno",
           "justifica": [
             "R1"
           ]
         },
         {
-          "nombre": "fecha_desde",
+          "nombre": "fecha_fin_turno",
           "justifica": [
-            "R1",
+            "R1"
+          ]
+        },
+        {
+          "nombre": "tipo_turno",
+          "justifica": [
+            "R1"
+          ]
+        },
+        {
+          "nombre": "supervisor_id",
+          "justifica": [
+            "R2",
+            "reportaA"
+          ]
+        },
+        {
+          "nombre": "fecha_inicio_supervisor",
+          "justifica": [
             "R2"
           ]
         },
         {
-          "nombre": "fecha_hasta",
-          "justifica": [
-            "R1",
-            "R2"
-          ]
-        },
-        {
-          "nombre": "supervisor",
+          "nombre": "fecha_fin_supervisor",
           "justifica": [
             "R2"
           ]
@@ -166,13 +200,13 @@ Para avanzar, ¿ustedes registran en sus sistemas el cambio de turno de cada col
       ],
       "justifica": [
         "R1",
-        "R2"
+        "R2",
+        "cumpleTurno",
+        "reportaA"
       ]
     }
   ],
-  "preguntas_abiertas": [
-    "¿Cuál sería el valor de N (días para considerar renuncia tras cambio a turno noche)?"
-  ],
+  "preguntas_abiertas": [],
   "completitud": "suficiente_para_confirmar"
 }
 ```
