@@ -79,6 +79,8 @@ describe("reglas verificables", () => {
     "Si una ruta tiene más de 15 paradas, se marca como ruta posiblemente demasiado larga.",
     "Si un repartidor tiene rutas largas, se marca saturación potencial.",
     "Si las salidas no se corresponden con el inventario, se marca posible error en el registro.",
+    "Si aumentar la frecuencia de conteos reduce las diferencias, habrá evidencia para decidir esa opción.",
+    "Si cambios en el registro de salidas reducen las diferencias, esa es la opción recomendada.",
   ])("rechaza conclusiones o especulación: %s", (enunciado) => {
     const req = requerimientoValido();
     req.reglas_candidatas[0].enunciado = enunciado;

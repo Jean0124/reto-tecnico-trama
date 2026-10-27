@@ -57,7 +57,7 @@ Un requerimiento solo se muestra si pasa dos capas (`src/lib/interview/validatio
    - sin ids de regla, fuentes ni columnas repetidas;
    - no puede ser `suficiente_para_confirmar` sin fuentes ni reglas;
    - **ninguna cifra que el usuario no haya dicho** (porcentajes y montos).
-   - **reglas verificables:** se rechazan reglas con conclusiones o especulación ("podría", "indica", "posible", "potencial", "significativo"). Una regla es "Si <condición observable>, entonces se marca <hecho>".
+   - **reglas verificables:** se rechazan reglas con conclusiones o especulación ("podría", "indica", "posible", "potencial", "significativo") y reglas sobre qué pasaría si se cambia algo ("si aumentar…", "habrá evidencia", "la opción recomendada"): eso no está en los datos. Una regla es "Si <condición observable>, entonces se marca <hecho>".
 
 Si falla, el modelo recibe los errores como resultado de la tool y puede corregir **dos veces** en el mismo turno. Si sigue fallando, no se registra nada y el agente debe pedirle al usuario lo que falta.
 

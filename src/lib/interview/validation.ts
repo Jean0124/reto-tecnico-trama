@@ -39,7 +39,7 @@ const norm = (s: string) =>
 
 /** Palabras que convierten una regla en conclusión o especulación (no verificable por el motor). */
 export const REGLA_VAGA =
-  /\b(podr[ií]an?|puede[n]? (?:indicar|afectar|ser|estar)|indica(?:r[ií]a)?|posibles?|es (?:la )?causa|probablemente|posiblemente|potencial(?:es|mente)?|quiz[aá]s?|significativ[oa]s?)\b/i;
+  /\b(podr[ií]an?|puede[n]? (?:indicar|afectar|ser|estar)|indica(?:r[ií]a)?|posibles?|es (?:la )?causa|probablemente|posiblemente|potencial(?:es|mente)?|quiz[aá]s?|significativ[oa]s?|habr[aá]|recomendad[oa]s?|evidencia para decidir|si (?:aumentar|cambiar|reducir|hacer|mejorar|implementar)\w*)\b/i;
 
 export function validarCoherencia(req: RequerimientoMotor): string[] {
   const errores: string[] = [];
@@ -59,7 +59,7 @@ export function validarCoherencia(req: RequerimientoMotor): string[] {
     const vaga = r.enunciado.match(REGLA_VAGA);
     if (vaga)
       errores.push(
-        `reglas_candidatas ${r.id}: "${vaga[0]}" no es verificable. Escribila como "Si <condición observable en los datos>, entonces se marca <hecho>", sin conclusiones ni especulación`,
+        `reglas_candidatas ${r.id}: "${vaga[0]}" no es verificable. Escribila como "Si <condición observable en los datos>, entonces se marca <hecho>", sin conclusiones, especulación ni hipótesis sobre qué pasaría si se cambia algo (la decisión la toma el usuario con la evidencia)`,
       );
   });
 
