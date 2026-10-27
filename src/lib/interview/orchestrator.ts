@@ -255,7 +255,7 @@ function procesarLlamada(
  * se responde con un mensaje seguro.
  */
 export const DETALLE_INTERNO =
-  /\b(no cumplen? (?:con )?el formato|formato (?:necesario|requerido|v[aá]lido)|validaci[oó]n|validar|la herramienta|registrar_\w+|json|corregir[eé]|versi[oó]n corregida|detect[eé] (?:detalles|errores|problemas)|errore?s? (?:de|en) (?:la|las) reglas?)\b/i;
+  /\b(no cumplen? (?:con )?el formato|formato (?:necesario|requerido|v[aá]lido)|validaci[oó]n|validar|la herramienta|registrar_\w+|json|corregir[eé]|versi[oó]n corregida|detect[eé] (?:detalles|errores|problemas)|verificables?|datos observables|cumplir con la verificaci[oó]n|reformul[oaeé]\w* (?:la )?(?:regla|R\d)|ajustar[eé] (?:la )?(?:regla|R\d)|errore?s? (?:de|en) (?:la|las) reglas?)\b/i;
 
 async function vigilarDetallesInternos(
   respuesta: string | null,
@@ -265,7 +265,10 @@ async function vigilarDetallesInternos(
   eventos: EventoTurno[],
   signal?: AbortSignal,
 ): Promise<string | null> {
-  if (!respuesta || !DETALLE_INTERNO.test(respuesta)) return respuesta;
+  // Tras un intento inválido en este turno, cualquier mención de reglas sale del proceso interno: también se reescribe.
+  const huboInvalido = eventos.some((e) => e.tipo === "requerimiento_invalido");
+  const hablaDeReglas = /\b(regla|reglas|R\d+)\b/.test(respuesta ?? "");
+  if (!respuesta || !(DETALLE_INTERNO.test(respuesta) || (huboInvalido && hablaDeReglas))) return respuesta;
   eventos.push({ tipo: "detalle_interno_bloqueado" });
   const reintento = await llm.completar({
     sistema: construirPromptSistema(

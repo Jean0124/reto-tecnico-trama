@@ -239,3 +239,23 @@ describe("ejecutarTurno", () => {
     expect(estado).toEqual(copia);
   });
 });
+
+describe("detalles internos", () => {
+  it.each([
+    "La regla sobre devoluciones la ajustaré para que sea verificable según datos observables.",
+    "Reformulo la regla R2 para cumplir con la verificación.",
+    "Noté que una regla no cumple el formato necesario.",
+  ])("detecta: %s", async (frase) => {
+    const { DETALLE_INTERNO } = await import("@/lib/interview/orchestrator");
+    expect(DETALLE_INTERNO.test(frase)).toBe(true);
+  });
+
+  it.each([
+    "El motor podrá verificar si las renuncias ocurren dentro de los 60 días.",
+    "Ajusté la fuente de los conteos físicos a PDF.",
+    "Revisá el requerimiento en el panel y confirmalo o pedime ajustes.",
+  ])("no molesta respuestas normales: %s", async (frase) => {
+    const { DETALLE_INTERNO } = await import("@/lib/interview/orchestrator");
+    expect(DETALLE_INTERNO.test(frase)).toBe(false);
+  });
+});
