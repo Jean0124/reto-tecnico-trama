@@ -89,6 +89,7 @@ e2e/                         ← Playwright
 - **JSON mal formado** en los argumentos: se trata igual que un requerimiento inválido.
 - **Tool fuera de fase:** se rechaza y se le avisa al modelo.
 - **Respuesta vacía del modelo:** se reintenta una vez; en la fase de proponer se fuerza el registro.
+- **Detalles internos en el chat:** si el agente le menciona al usuario validaciones, formato de reglas o correcciones, se le pide reescribir y, si insiste, se responde con un mensaje seguro (mismo mecanismo que las cifras inventadas).
 - **"Actualicé el requerimiento" sin registrarlo:** si en revisión el modelo afirma un cambio sin llamar a la tool, se lo obliga a registrar la nueva versión, para que el panel nunca contradiga al chat (caso encontrado probando con el modelo real).
 - **Timeouts y errores de la API:** 20 s por llamada al modelo (1 reintento), tope de 55 s por turno completo (por debajo del `maxDuration` de 60 s de la ruta) y 150 s en el cliente. Los errores se traducen a mensajes claros (504/502/503) y **el mensaje del usuario vuelve al cuadro de texto** para reintentar.
 - **Abuso:** contraseña opcional, límite por IP, máximo de 40 mensajes por conversación y de 4000 caracteres por mensaje, `max_completion_tokens` acotado.

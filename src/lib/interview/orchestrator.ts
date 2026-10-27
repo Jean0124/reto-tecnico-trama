@@ -20,9 +20,9 @@ import { construirPromptSistema } from "./prompt";
 import { cifrasNoAportadas, validarRequerimiento } from "./validation";
 
 /** Iteraciones máximas modelo↔herramientas en un turno. */
-const MAX_PASOS = 5;
+const MAX_PASOS = 6;
 /** Intentos de registrar un requerimiento inválido antes de rendirse en este turno. */
-const MAX_INTENTOS_INVALIDOS = 2;
+const MAX_INTENTOS_INVALIDOS = 3;
 
 const DEFINICIONES: Record<NombreHerramienta, DefinicionHerramienta> = {
   registrar_contexto: {
@@ -44,7 +44,8 @@ export type EventoTurno =
   | { tipo: "requerimiento_registrado"; version: number }
   | { tipo: "requerimiento_invalido"; errores: string[] }
   | { tipo: "cifras_bloqueadas"; cifras: string[] }
-  | { tipo: "cambio_sin_registrar" };
+  | { tipo: "cambio_sin_registrar" }
+  | { tipo: "detalle_interno_bloqueado" };
 
 export type ResultadoTurno = {
   respuesta: string;
@@ -166,6 +167,7 @@ export async function ejecutarTurno(params: {
   }
 
   respuesta = await vigilarCifras(respuesta, textoUsuario, estado, conversacion, llm, eventos, signal);
+  respuesta = await vigilarDetallesInternos(respuesta, estado, conversacion, llm, eventos, signal);
 
   return {
     respuesta: respuesta ?? respuestaDeRespaldo(estado),
@@ -247,6 +249,39 @@ function procesarLlamada(
  * trae porcentajes o montos que el usuario no dijo, se pide una reescritura
  * sin ellos; si insiste, se reemplaza por una respuesta segura.
  */
+/**
+ * El usuario no tiene por qué saber de validaciones, formatos ni herramientas: si la respuesta las
+ * menciona ("la regla no cumple el formato", "lo corregiré"), se pide una reescritura y, si insiste,
+ * se responde con un mensaje seguro.
+ */
+export const DETALLE_INTERNO =
+  /\b(no cumplen? (?:con )?el formato|formato (?:necesario|requerido|v[aá]lido)|validaci[oó]n|validar|la herramienta|registrar_\w+|json|corregir[eé]|versi[oó]n corregida|detect[eé] (?:detalles|errores|problemas)|errore?s? (?:de|en) (?:la|las) reglas?)\b/i;
+
+async function vigilarDetallesInternos(
+  respuesta: string | null,
+  estado: EstadoEntrevista,
+  conversacion: MensajeLLM[],
+  llm: ClienteLLM,
+  eventos: EventoTurno[],
+  signal?: AbortSignal,
+): Promise<string | null> {
+  if (!respuesta || !DETALLE_INTERNO.test(respuesta)) return respuesta;
+  eventos.push({ tipo: "detalle_interno_bloqueado" });
+  const reintento = await llm.completar({
+    sistema: construirPromptSistema(
+      estado,
+      `Tu respuesta anterior hablaba de detalles internos (validaciones, formato de reglas, correcciones, herramientas). El usuario no debe ver eso. Reescribila en 1 o 2 frases hablando solo de su negocio: qué quedó en el panel o, si falta algo, una única pregunta concreta sobre sus datos. Respuesta anterior: """${respuesta}"""`,
+    ),
+    mensajes: conversacion,
+    herramientas: herramientasDisponibles(calcularFase(estado)).map((n) => DEFINICIONES[n]),
+    eleccion: "ninguna",
+    signal,
+  });
+  const texto = reintento.texto?.trim() ?? "";
+  if (texto && !DETALLE_INTERNO.test(texto)) return texto;
+  return null;
+}
+
 async function vigilarCifras(
   respuesta: string | null,
   textoUsuario: string,

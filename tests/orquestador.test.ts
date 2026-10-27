@@ -74,14 +74,15 @@ describe("ejecutarTurno", () => {
     const llm = new ClienteGuionado([
       herramienta("registrar_requerimiento", "{json roto"),
       herramienta("registrar_requerimiento", { necesidad: "x" }),
+      herramienta("registrar_requerimiento", { necesidad: "y" }),
       texto("Antes de proponer, ¿qué sistema usan para registrar los turnos?"),
     ]);
     const r = await ejecutarTurno({ llm, mensajes: conversacion(TEXTO_USUARIO), estado: estadoDelimitado() });
 
     expect(r.estado.versiones).toHaveLength(0);
-    expect(r.eventos.filter((e) => e.tipo === "requerimiento_invalido")).toHaveLength(2);
-    expect(llm.peticiones[2].eleccion).toBe("ninguna");
-    expect(llm.peticiones[2].sistema).toContain("NO se mostró al usuario");
+    expect(r.eventos.filter((e) => e.tipo === "requerimiento_invalido")).toHaveLength(3);
+    expect(llm.peticiones[3].eleccion).toBe("ninguna");
+    expect(llm.peticiones[3].sistema).toContain("NO se mostró al usuario");
     expect(r.respuesta).toContain("¿qué sistema usan");
   });
 
@@ -207,6 +208,27 @@ describe("ejecutarTurno", () => {
     });
     expect(llm.peticiones).toHaveLength(1);
     expect(r.estado.versiones).toHaveLength(1);
+  });
+
+  it("no deja que el agente le hable al usuario de validaciones o formato de reglas", async () => {
+    const llm = new ClienteGuionado([
+      texto("Noté que una regla no cumple el formato necesario. ¿Querés que siga?"),
+      texto("Dejé el requerimiento en el panel. ¿Cada cuánto te gustaría hacer los conteos físicos?"),
+    ]);
+    const r = await ejecutarTurno({ llm, mensajes: conversacion(TEXTO_USUARIO), estado: estadoDelimitado() });
+    expect(r.respuesta).toBe("Dejé el requerimiento en el panel. ¿Cada cuánto te gustaría hacer los conteos físicos?");
+    expect(r.eventos).toContainEqual({ tipo: "detalle_interno_bloqueado" });
+  });
+
+  it("si insiste con detalles internos, responde con un mensaje seguro", async () => {
+    const llm = new ClienteGuionado([texto("La validación falló."), texto("Corregí el JSON.")]);
+    const r = await ejecutarTurno({
+      llm,
+      mensajes: conversacion("hola"),
+      estado: estadoDelimitado({ versiones: [requerimientoValido()] }),
+    });
+    expect(r.respaldo).toBe(true);
+    expect(r.respuesta).not.toMatch(/validaci|json|correg/i);
   });
 
   it("no muta el estado recibido", async () => {
