@@ -20,6 +20,7 @@ type Props = {
   necesitaPassword: boolean;
   onPassword: (v: string) => void;
   composerRef: RefObject<HTMLTextAreaElement | null>;
+  className?: string;
 };
 
 export function Chat({
@@ -33,6 +34,7 @@ export function Chat({
   necesitaPassword,
   onPassword,
   composerRef,
+  className,
 }: Props) {
   const finRef = useRef<HTMLDivElement>(null);
 
@@ -41,7 +43,7 @@ export function Chat({
   }, [mensajes.length, enviando]);
 
   return (
-    <section aria-label="Chat" className="flex min-h-0 flex-col bg-sidebar">
+    <section aria-label="Chat" className={cn("flex min-h-0 flex-col bg-sidebar", className)}>
       <div className="flex-1 space-y-3 overflow-y-auto p-4" aria-live="polite">
         {mensajes.map((m, i) => (
           <Mensaje key={i} mensaje={m} />
@@ -71,7 +73,12 @@ export function Chat({
               if (typeof valor === "string" && valor) onPassword(valor);
             }}
           >
-            <Input name="password" type="password" placeholder="Contraseña de acceso" aria-label="Contraseña de acceso" />
+            <Input
+              name="password"
+              type="password"
+              placeholder="Contraseña de acceso"
+              aria-label="Contraseña de acceso"
+            />
             <Button type="submit" variant="outline">
               Guardar
             </Button>

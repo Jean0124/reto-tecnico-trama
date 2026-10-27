@@ -44,6 +44,7 @@ revisar   ──(usuario aprieta "Confirmar")───────────�
 
 - Cuando el usuario confirma. El cierre lo hace la UI (no hace falta otra llamada al modelo) y el servidor rechaza turnos posteriores.
 - El botón **Confirmar** solo se habilita si `completitud` es `suficiente_para_confirmar`; con `faltan_datos`, el panel pide resolver las preguntas abiertas en el chat.
+- Para que la revisión sea fácil, el panel marca qué cambió respecto a la versión anterior (archivos, columnas, tipos y reglas), y **Confirmar** muestra un resumen (archivos, columnas, reglas y preguntas pendientes) antes de cerrar, porque la confirmación no se puede deshacer.
 
 ## Validación del requerimiento (servidor)
 
