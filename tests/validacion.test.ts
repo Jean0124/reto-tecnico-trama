@@ -74,7 +74,7 @@ describe("reglas verificables", () => {
   it.each([
     "Si una ruta tiene muchas paradas, podría estar afectando la puntualidad.",
     "Si un pedido tiene un reclamo, indica insatisfacción.",
-    "Si una devolución no está registrada, se marca como posible causa.",
+    "Si una devolución se marca como posible causa.",
     "Si los reclamos aumentan de forma significativa, se marca.",
     "Si una ruta tiene más de 15 paradas, se marca como ruta posiblemente demasiado larga.",
     "Si un repartidor tiene rutas largas, se marca saturación potencial.",
@@ -85,6 +85,13 @@ describe("reglas verificables", () => {
     const r = validarRequerimiento(req, TEXTO_USUARIO);
     expect(r.ok).toBe(false);
     if (!r.ok) expect(r.errores.join()).toContain("no es verificable");
+  });
+
+  it("acepta comparaciones entre fuentes aunque digan 'no está registrada'", () => {
+    const req = requerimientoValido();
+    req.reglas_candidatas[0].enunciado =
+      "Si una devolución de las notas crédito no está registrada en los movimientos del ERP para la misma bodega y producto, se marca una inconsistencia.";
+    expect(validarRequerimiento(req, TEXTO_USUARIO).ok).toBe(true);
   });
 
   it("acepta condiciones observables con umbral parametrizado", () => {

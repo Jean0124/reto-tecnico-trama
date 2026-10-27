@@ -137,10 +137,9 @@ export async function ejecutarTurno(params: {
     if (
       res.llamadas.length === 0 &&
       texto &&
-      fase === "revisar" &&
       !registroEnEsteTurno &&
       !accionSinRegistro &&
-      afirmaCambio(texto)
+      ((fase === "revisar" && afirmaCambio(texto)) || (fase !== "delimitar" && prometeAccion(texto)))
     ) {
       // "Actualicé la fuente…" sin haber registrado nada: el panel quedaría desactualizado.
       accionSinRegistro = true;
@@ -255,7 +254,7 @@ function procesarLlamada(
  * se responde con un mensaje seguro.
  */
 export const DETALLE_INTERNO =
-  /\b(no cumplen? (?:con )?el formato|formato (?:necesario|requerido|v[aá]lido)|validaci[oó]n|validar|la herramienta|registrar_\w+|json|corregir[eé]|versi[oó]n corregida|detect[eé] (?:detalles|errores|problemas)|verificables?|datos observables|cumplir con la verificaci[oó]n|reformul[oaeé]\w* (?:la )?(?:regla|R\d)|ajustar[eé] (?:la )?(?:regla|R\d)|errore?s? (?:de|en) (?:la|las) reglas?)\b/i;
+  /\b(no cumplen? (?:con )?el formato|formato (?:necesario|requerido|v[aá]lido)|validaci[oó]n|validar|la herramienta|registrar_\w+|json|corregir[eé]|versi[oó]n corregida|detect[eé] (?:detalles|errores|problemas)|verificables?|datos observables|reformul\w*|evitar suposiciones|cumplir con la verificaci[oó]n|reformul[oaeé]\w* (?:la )?(?:regla|R\d)|ajustar[eé] (?:la )?(?:regla|R\d)|errore?s? (?:de|en) (?:la|las) reglas?)\b/i;
 
 async function vigilarDetallesInternos(
   respuesta: string | null,
@@ -313,6 +312,13 @@ async function vigilarCifras(
   const texto = reintento.texto?.trim() ?? "";
   if (texto && cifrasNoAportadas(texto, textoUsuario).length === 0) return texto;
   return null;
+}
+
+/** El texto promete armar o registrar algo "ahora" sin haberlo hecho ("un momento", "ahora preparo…"). */
+export function prometeAccion(texto: string): boolean {
+  return /\b(un momento|ahora (?:preparo|armo|registro|lo registro)|voy a (?:preparar|registrar|armar|proponer)|preparo y registro|en breve)\b/i.test(
+    texto,
+  );
 }
 
 /** El texto afirma haber modificado el requerimiento (actualicé, cambié, agregué…). */

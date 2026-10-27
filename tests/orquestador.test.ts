@@ -240,10 +240,25 @@ describe("ejecutarTurno", () => {
   });
 });
 
+describe("promesas sin acción", () => {
+  it("si dice 'un momento' sin registrar, se lo obliga a registrar", async () => {
+    const llm = new ClienteGuionado([
+      texto("Ahora preparo y registro un modelo con este ajuste. Un momento."),
+      herramienta("registrar_requerimiento", requerimientoValido()),
+      texto("Te dejé la propuesta en el panel."),
+    ]);
+    const r = await ejecutarTurno({ llm, mensajes: conversacion(TEXTO_USUARIO), estado: estadoDelimitado() });
+    expect(llm.peticiones[1].eleccion).toEqual({ nombre: "registrar_requerimiento" });
+    expect(r.estado.versiones).toHaveLength(1);
+    expect(r.respuesta).toBe("Te dejé la propuesta en el panel.");
+  });
+});
+
 describe("detalles internos", () => {
   it.each([
     "La regla sobre devoluciones la ajustaré para que sea verificable según datos observables.",
     "Reformulo la regla R2 para cumplir con la verificación.",
+    "Reformulo la segunda regla para evitar suposiciones.",
     "Noté que una regla no cumple el formato necesario.",
   ])("detecta: %s", async (frase) => {
     const { DETALLE_INTERNO } = await import("@/lib/interview/orchestrator");
