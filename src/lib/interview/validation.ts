@@ -171,11 +171,13 @@ export function cifrasNoAportadas(texto: string, textoUsuario: string): string[]
 }
 
 /**
- * Último recurso cuando el modelo no logra corregir el requerimiento: si los
- * únicos problemas son reglas puntuales (especulativas, con umbrales o cifras que
- * el usuario no dio), se descartan esas reglas, se limpian sus referencias y se
- * registra el resto. Nada inventado llega al panel y el usuario no queda trabado.
- * Devuelve null si el resto tampoco es válido.
+ * Último recurso cuando el modelo no logra corregir el requerimiento. Arregla en
+ * forma determinista lo que se puede arreglar sin inventar nada:
+ * - descarta las reglas especulativas o con umbrales/cifras que el usuario no dio;
+ * - declara las clases que usan las relaciones;
+ * - quita justificaciones que no apuntan a nada y las columnas o fuentes que quedan sin justificar;
+ * - elimina clases, reglas, columnas y fuentes repetidas.
+ * Devuelve null si con eso tampoco es válido (por ejemplo, cifras inventadas en la necesidad).
  */
 export function rescatarRequerimiento(
   entrada: unknown,
@@ -184,6 +186,19 @@ export function rescatarRequerimiento(
   const forma = RequerimientoMotorSchema.safeParse(entrada);
   if (!forma.success) return null;
   const req = structuredClone(forma.data);
+  const unicos = <T>(xs: T[], clave: (x: T) => string) => {
+    const vistos = new Set<string>();
+    return xs.filter((x) => (vistos.has(clave(x)) ? false : (vistos.add(clave(x)), true)));
+  };
+
+  // Clases: las que usan las relaciones también se declaran.
+  req.esquema.clases = unicos(
+    [...req.esquema.clases, ...req.esquema.relaciones.flatMap((r) => [r.sujeto, r.objeto])],
+    norm,
+  );
+
+  // Reglas: fuera las que no son verificables o usan números que el usuario no dio.
+  req.reglas_candidatas = unicos(req.reglas_candidatas, (r) => norm(r.id));
   const malas = new Set(
     req.reglas_candidatas
       .filter(
@@ -194,21 +209,34 @@ export function rescatarRequerimiento(
       )
       .map((r) => norm(r.id)),
   );
-  if (malas.size === 0) return null;
   req.reglas_candidatas = req.reglas_candidatas.filter((r) => !malas.has(norm(r.id)));
   if (req.reglas_candidatas.length === 0) return null;
 
-  const limpiar = (refs: string[]) => refs.filter((x) => !malas.has(norm(x)));
-  req.fuentes_requeridas = req.fuentes_requeridas
-    .map((f) => {
-      const columnas_minimas = f.columnas_minimas
-        .map((c) => ({ ...c, justifica: limpiar(c.justifica) }))
-        .filter((c) => c.justifica.length > 0);
-      const propia = limpiar(f.justifica);
-      const justifica = propia.length ? propia : [...new Set(columnas_minimas.flatMap((c) => c.justifica))];
-      return { ...f, justifica, columnas_minimas };
-    })
-    .filter((f) => f.justifica.length > 0 && f.columnas_minimas.length > 0);
+  // Justificaciones: solo las que apuntan a una clase, regla o relación existente.
+  const validas = new Set<string>([
+    ...req.esquema.clases.map(norm),
+    ...req.reglas_candidatas.map((r) => norm(r.id)),
+    ...req.esquema.relaciones.flatMap((r) => [
+      norm(r.predicado),
+      norm(`${r.sujeto} ${r.predicado} ${r.objeto}`),
+      norm(`${r.sujeto}.${r.predicado}.${r.objeto}`),
+    ]),
+  ]);
+  const limpiar = (refs: string[]) => unicos(refs.filter((x) => validas.has(norm(x))), norm);
+  req.fuentes_requeridas = unicos(
+    req.fuentes_requeridas
+      .map((f) => {
+        const columnas_minimas = unicos(
+          f.columnas_minimas.map((c) => ({ ...c, justifica: limpiar(c.justifica) })).filter((c) => c.justifica.length > 0),
+          (c) => norm(c.nombre),
+        );
+        const propia = limpiar(f.justifica);
+        const justifica = propia.length ? propia : unicos(columnas_minimas.flatMap((c) => c.justifica), norm);
+        return { ...f, justifica, columnas_minimas };
+      })
+      .filter((f) => f.justifica.length > 0 && f.columnas_minimas.length > 0),
+    (f) => norm(f.nombre),
+  );
 
   const v = validarRequerimiento(req, textoUsuario);
   return v.ok ? { requerimiento: v.requerimiento, descartadas: [...malas].map((x) => x.toUpperCase()) } : null;

@@ -151,9 +151,20 @@ describe("rescatarRequerimiento", () => {
     expect(columnas).toContain("supervisor_id");
   });
 
-  it("no rescata si el problema no son las reglas", () => {
+  it("declara clases usadas en relaciones y quita justificaciones que no apuntan a nada", () => {
     const req = requerimientoValido();
-    req.esquema.relaciones.push({ sujeto: "Empleado", predicado: "x", objeto: "Sede" });
+    req.esquema.relaciones.push({ sujeto: "Empleado", predicado: "trabajaEn", objeto: "Sede" });
+    req.fuentes_requeridas[0].columnas_minimas.push({ nombre: "salario", justifica: ["por las dudas"] });
+    req.fuentes_requeridas[0].columnas_minimas[0].justifica.push("algo inventado");
+    const r = rescatarRequerimiento(req, TEXTO_USUARIO);
+    expect(r?.requerimiento.esquema.clases).toContain("Sede");
+    const nomina = r?.requerimiento.fuentes_requeridas[0];
+    expect(nomina?.columnas_minimas.map((c) => c.nombre)).not.toContain("salario");
+    expect(nomina?.columnas_minimas[0].justifica).toEqual(["Empleado"]);
+  });
+
+  it("no rescata lo que no se puede arreglar sin inventar (cifras en la necesidad)", () => {
+    const req = { ...requerimientoValido(), necesidad: "El 35% se va por los turnos" };
     expect(rescatarRequerimiento(req, TEXTO_USUARIO)).toBeNull();
   });
 });

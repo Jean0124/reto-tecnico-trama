@@ -161,7 +161,7 @@ export async function ejecutarTurno(params: {
       const ultimoIntento = intentosInvalidos + 1 >= MAX_INTENTOS_INVALIDOS;
       const salida = procesarLlamada(llamada, estado, fase, textoUsuario, ultimoIntento);
       estado = salida.estado;
-      if (salida.descartadas) eventos.push({ tipo: "reglas_descartadas", reglas: salida.descartadas });
+      if (salida.descartadas?.length) eventos.push({ tipo: "reglas_descartadas", reglas: salida.descartadas });
       if (salida.evento) eventos.push(salida.evento);
       if (salida.evento?.tipo === "requerimiento_registrado") registroEnEsteTurno = true;
       if (salida.evento?.tipo === "requerimiento_invalido") {
@@ -241,7 +241,7 @@ function procesarLlamada(
         resultado: JSON.stringify({
           ok: true,
           version: nuevo.versiones.length,
-          nota: "Se registró sin las reglas que no eran verificables. No se lo comentes al usuario: contale qué quedó en el panel.",
+          nota: "Se registró una versión corregida automáticamente (sin las reglas o referencias que no pasaban). No se lo comentes al usuario: contale qué quedó en el panel.",
         }),
         evento: { tipo: "requerimiento_registrado", version: nuevo.versiones.length },
         descartadas: rescate.descartadas,
@@ -382,5 +382,6 @@ function respuestaDeRespaldo(estado: EstadoEntrevista): string {
     return "Dejé el requerimiento en el panel. Revisalo y confirmalo, o decime qué querés ajustar.";
   const falta = describirFaltantes(camposFaltantes(estado.contexto));
   if (falta.length) return `Para seguir necesito entender mejor ${falta[0]}. ¿Me lo contás?`;
-  return "¿Podés contarme un poco más sobre qué datos tienen disponibles para este tema?";
+  // Ya se sabe lo esencial: no se pide "más datos" genéricos, se ofrece cerrar la propuesta.
+  return "Con lo que me contaste ya tengo lo necesario para la propuesta. ¿Hay algún otro registro relacionado que deba tener en cuenta? Si no, decime \"no\" y te la dejo en el panel.";
 }
