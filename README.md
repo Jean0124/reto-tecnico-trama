@@ -15,6 +15,7 @@ En el flujo de Trama cubre los pasos **1. Plantear necesidad** y **2. Determinar
 
 - **Demo:** https://reto-tecnico-trama.vercel.app
 - **Repo:** https://github.com/Jean0124/reto-tecnico-trama
+- **Video del flujo completo:** https://drive.google.com/file/d/1ntvf1AdhzLmQAugaBlZAJLSTDKpaHb_P/view?usp=sharing
 - **Diseño de la entrevista:** [DESIGN.md](./DESIGN.md)
 - **Transcripciones de prueba:** [`transcripciones/`](./transcripciones)
 
@@ -130,4 +131,4 @@ e2e/                         ← Playwright
   - [Rotación de personal](transcripciones/01-rotacion-de-personal.md) (RR. HH.)
   - [Pedidos que llegan tarde](transcripciones/02-pedidos-tarde.md) (logística)
   - [Inventario que no cuadra](transcripciones/03-inventario.md) (operaciones / bodegas)
-- [ ] Video o GIF del flujo completo
+- [x] [Video del flujo completo](https://drive.google.com/file/d/1ntvf1AdhzLmQAugaBlZAJLSTDKpaHb_P/view?usp=sharing): entrevista de ventas, ajuste con diff de versiones, plantilla CSV y confirmación
