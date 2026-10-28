@@ -118,6 +118,7 @@ e2e/                         ← Playwright
 - El estado viaja desde el cliente: un usuario podría editarlo. Se valida la forma, pero no se firma.
 - El control de cifras detecta porcentajes y montos, no afirmaciones causales sin números ("la causa son los turnos"). Eso depende del prompt.
 - La entrevista puede fallar cuando el usuario plantea **varias necesidades a la vez** (tiende a mezclarlas en un solo modelo) o cuando **no hay una decisión clara** detrás de la pregunta.
+- La validación revisa que una regla sea verificable, no que la **dirección del cruce** sea la correcta. En la transcripción de inventario, R2 busca devoluciones del ERP sin nota crédito, cuando la sospecha era la inversa (notas crédito sin movimiento en el ERP). Por eso el usuario revisa el requerimiento en el panel antes de confirmar.
 - Interfaz y prompt en español.
 
 ## Entrega
@@ -125,5 +126,8 @@ e2e/                         ← Playwright
 - [x] URL de Vercel
 - [x] Repo con commits convencionales
 - [x] DESIGN.md
-- [ ] Tres transcripciones en `transcripciones/` (botón "Exportar transcripción" en la app)
+- [x] Tres transcripciones de dominios distintos, cada una con su requerimiento confirmado:
+  - [Rotación de personal](transcripciones/01-rotacion-de-personal.md) (RR. HH.)
+  - [Pedidos que llegan tarde](transcripciones/02-pedidos-tarde.md) (logística)
+  - [Inventario que no cuadra](transcripciones/03-inventario.md) (operaciones / bodegas)
 - [ ] Video o GIF del flujo completo
