@@ -61,7 +61,7 @@ Un requerimiento solo se muestra si pasa dos capas (`src/lib/interview/validatio
    - **ningún umbral elegido por el agente:** cada número de una regla ("más de 3", "60 días") tiene que haberlo dicho el usuario; si no, la regla usa un parámetro (N, P…) y su valor queda como pregunta abierta;
    - **reglas verificables:** se rechazan reglas con conclusiones o especulación ("podría", "indica", "posible", "potencial", "significativo") y reglas sobre qué pasaría si se cambia algo ("si aumentar…", "habrá evidencia", "la opción recomendada"): eso no está en los datos. Una regla es "Si <condición observable>, entonces se marca <hecho>".
 
-Si falla, el modelo recibe los errores como resultado de la tool y puede corregir **dos veces** en el mismo turno. Si sigue fallando, no se registra nada y el agente debe pedirle al usuario lo que falta.
+Si falla, el modelo recibe los errores como resultado de la tool y puede corregir en el mismo turno (hasta 3 intentos). En el último intento, si lo único que falla son reglas puntuales (especulativas o con umbrales/cifras que el usuario no dio), el servidor **descarta esas reglas**, limpia las columnas que solo ellas justificaban y registra el resto: nada inventado llega al panel y el usuario no queda trabado. Si ni así es válido, no se registra nada, el agente no puede decir que dejó algo en el panel y tiene que hacer una pregunta concreta sobre el negocio.
 
 ## "Ninguna cifra sale del LLM"
 

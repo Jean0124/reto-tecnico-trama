@@ -41,7 +41,10 @@ export function umbralesNoAportados(req: RequerimientoMotor, textoUsuario: strin
   const delUsuario = new Set(textoUsuario.match(numero) ?? []);
   const errores: string[] = [];
   for (const r of req.reglas_candidatas) {
-    const inventados = [...new Set(r.enunciado.match(numero) ?? [])].filter((n) => !delUsuario.has(n));
+    // 0 y 1 son estructurales ("al menos 1 nota", "más de 0 unidades"), no umbrales elegidos.
+    const inventados = [...new Set(r.enunciado.match(numero) ?? [])].filter(
+      (n) => n !== "0" && n !== "1" && !delUsuario.has(n),
+    );
     if (inventados.length)
       errores.push(
         `reglas_candidatas ${r.id}: el umbral ${inventados.map((n) => `"${n}"`).join(", ")} no lo dijo el usuario. Usá un parámetro con nombre (ej. "menor a P") y agregá a preguntas_abiertas cuál sería su valor`,
@@ -165,4 +168,48 @@ export function cifrasNoAportadas(texto: string, textoUsuario: string): string[]
     }
   }
   return [...encontradas];
+}
+
+/**
+ * Último recurso cuando el modelo no logra corregir el requerimiento: si los
+ * únicos problemas son reglas puntuales (especulativas, con umbrales o cifras que
+ * el usuario no dio), se descartan esas reglas, se limpian sus referencias y se
+ * registra el resto. Nada inventado llega al panel y el usuario no queda trabado.
+ * Devuelve null si el resto tampoco es válido.
+ */
+export function rescatarRequerimiento(
+  entrada: unknown,
+  textoUsuario: string,
+): { requerimiento: RequerimientoMotor; descartadas: string[] } | null {
+  const forma = RequerimientoMotorSchema.safeParse(entrada);
+  if (!forma.success) return null;
+  const req = structuredClone(forma.data);
+  const malas = new Set(
+    req.reglas_candidatas
+      .filter(
+        (r) =>
+          REGLA_VAGA.test(r.enunciado) ||
+          cifrasNoAportadas(r.enunciado, textoUsuario).length > 0 ||
+          umbralesNoAportados({ ...req, reglas_candidatas: [r] }, textoUsuario).length > 0,
+      )
+      .map((r) => norm(r.id)),
+  );
+  if (malas.size === 0) return null;
+  req.reglas_candidatas = req.reglas_candidatas.filter((r) => !malas.has(norm(r.id)));
+  if (req.reglas_candidatas.length === 0) return null;
+
+  const limpiar = (refs: string[]) => refs.filter((x) => !malas.has(norm(x)));
+  req.fuentes_requeridas = req.fuentes_requeridas
+    .map((f) => {
+      const columnas_minimas = f.columnas_minimas
+        .map((c) => ({ ...c, justifica: limpiar(c.justifica) }))
+        .filter((c) => c.justifica.length > 0);
+      const propia = limpiar(f.justifica);
+      const justifica = propia.length ? propia : [...new Set(columnas_minimas.flatMap((c) => c.justifica))];
+      return { ...f, justifica, columnas_minimas };
+    })
+    .filter((f) => f.justifica.length > 0 && f.columnas_minimas.length > 0);
+
+  const v = validarRequerimiento(req, textoUsuario);
+  return v.ok ? { requerimiento: v.requerimiento, descartadas: [...malas].map((x) => x.toUpperCase()) } : null;
 }

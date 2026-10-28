@@ -17,7 +17,7 @@ import {
   type NombreHerramienta,
 } from "./engine";
 import { construirPromptSistema } from "./prompt";
-import { cifrasNoAportadas, validarRequerimiento } from "./validation";
+import { cifrasNoAportadas, rescatarRequerimiento, validarRequerimiento } from "./validation";
 
 /** Iteraciones máximas modelo↔herramientas en un turno. */
 const MAX_PASOS = 6;
@@ -45,7 +45,8 @@ export type EventoTurno =
   | { tipo: "requerimiento_invalido"; errores: string[] }
   | { tipo: "cifras_bloqueadas"; cifras: string[] }
   | { tipo: "cambio_sin_registrar" }
-  | { tipo: "detalle_interno_bloqueado" };
+  | { tipo: "detalle_interno_bloqueado" }
+  | { tipo: "reglas_descartadas"; reglas: string[] };
 
 export type ResultadoTurno = {
   respuesta: string;
@@ -157,8 +158,10 @@ export async function ejecutarTurno(params: {
 
     conversacion.push({ rol: "agente", contenido: res.texto, llamadas: res.llamadas });
     for (const llamada of res.llamadas) {
-      const salida = procesarLlamada(llamada, estado, fase, textoUsuario);
+      const ultimoIntento = intentosInvalidos + 1 >= MAX_INTENTOS_INVALIDOS;
+      const salida = procesarLlamada(llamada, estado, fase, textoUsuario, ultimoIntento);
       estado = salida.estado;
+      if (salida.descartadas) eventos.push({ tipo: "reglas_descartadas", reglas: salida.descartadas });
       if (salida.evento) eventos.push(salida.evento);
       if (salida.evento?.tipo === "requerimiento_registrado") registroEnEsteTurno = true;
       if (salida.evento?.tipo === "requerimiento_invalido") {
@@ -186,7 +189,8 @@ function procesarLlamada(
   estado: EstadoEntrevista,
   fase: Fase,
   textoUsuario: string,
-): { estado: EstadoEntrevista; resultado: string; evento?: EventoTurno } {
+  ultimoIntento = false,
+): { estado: EstadoEntrevista; resultado: string; evento?: EventoTurno; descartadas?: string[] } {
   const permitidas = herramientasDisponibles(fase) as string[];
   if (!permitidas.includes(llamada.nombre)) {
     return {
@@ -227,6 +231,23 @@ function procesarLlamada(
 
   // registrar_requerimiento
   const validacion = validarRequerimiento(argumentos, textoUsuario);
+  if (!validacion.ok && ultimoIntento) {
+    // Último intento: si lo único que falla son reglas puntuales, se registran las demás.
+    const rescate = rescatarRequerimiento(argumentos, textoUsuario);
+    if (rescate) {
+      const nuevo = { ...estado, versiones: [...estado.versiones, rescate.requerimiento] };
+      return {
+        estado: nuevo,
+        resultado: JSON.stringify({
+          ok: true,
+          version: nuevo.versiones.length,
+          nota: "Se registró sin las reglas que no eran verificables. No se lo comentes al usuario: contale qué quedó en el panel.",
+        }),
+        evento: { tipo: "requerimiento_registrado", version: nuevo.versiones.length },
+        descartadas: rescate.descartadas,
+      };
+    }
+  }
   if (!validacion.ok) {
     return {
       estado,
@@ -258,7 +279,10 @@ function procesarLlamada(
  * se responde con un mensaje seguro.
  */
 export const DETALLE_INTERNO =
-  /\b(no cumplen? (?:con )?el formato|formato (?:necesario|requerido|v[aá]lido)|validaci[oó]n|validar|la herramienta|registrar_\w+|json|corregir[eé]|versi[oó]n corregida|detect[eé] (?:detalles|errores|problemas)|verificables?|datos observables|reformul\w*|evitar suposiciones|cumplir con la verificaci[oó]n|reformul[oaeé]\w* (?:la )?(?:regla|R\d)|ajustar[eé] (?:la )?(?:regla|R\d)|errore?s? (?:de|en) (?:la|las) reglas?)\b/i;
+  /\b(no cumplen? (?:con )?el formato|formato (?:necesario|requerido|v[aá]lido)|validaci[oó]n|validar|la herramienta|registrar_\w+|json|corregir[eé]|versi[oó]n corregida|detect[eé] (?:detalles|errores|problemas)|verificables?|datos observables|reformul\w*|evitar suposiciones|cumplir con la verificaci[oó]n|reformul[oaeé]\w* (?:la )?(?:regla|R\d)|ajustar[eé] (?:la )?(?:regla|R\d)|errore?s? (?:de|en) (?:la|las) reglas?|cambi[eé] la frase|sin decir)\b/i;
+
+/** El texto dice que algo quedó en el panel o que se registró/actualizó. */
+export const AFIRMA_PANEL = /\b(panel|dej[eé]|registr[eé]|propuse|prepar[eé]|actualic[eé])\b/i;
 
 async function vigilarDetallesInternos(
   respuesta: string | null,
@@ -271,12 +295,21 @@ async function vigilarDetallesInternos(
   // Tras un intento inválido en este turno, cualquier mención de reglas sale del proceso interno: también se reescribe.
   const huboInvalido = eventos.some((e) => e.tipo === "requerimiento_invalido");
   const hablaDeReglas = /\b(regla|reglas|R\d+)\b/.test(respuesta ?? "");
-  if (!respuesta || !(DETALLE_INTERNO.test(respuesta) || (huboInvalido && hablaDeReglas))) return respuesta;
+  const registro = eventos.some((e) => e.tipo === "requerimiento_registrado");
+  const sinRegistroValido = huboInvalido && !registro;
+  const afirmaPanel = AFIRMA_PANEL.test(respuesta ?? "");
+  if (
+    !respuesta ||
+    !(DETALLE_INTERNO.test(respuesta) || (huboInvalido && hablaDeReglas) || (sinRegistroValido && afirmaPanel))
+  )
+    return respuesta;
   eventos.push({ tipo: "detalle_interno_bloqueado" });
   const reintento = await llm.completar({
     sistema: construirPromptSistema(
       estado,
-      `Tu respuesta anterior hablaba de detalles internos (validaciones, formato de reglas, correcciones, herramientas). El usuario no debe ver eso. Reescribila en 1 o 2 frases hablando solo de su negocio: qué quedó en el panel o, si falta algo, una única pregunta concreta sobre sus datos. Respuesta anterior: """${respuesta}"""`,
+      sinRegistroValido
+        ? `En este turno NO quedó ningún requerimiento nuevo en el panel, así que no digas que lo dejaste, registraste o actualizaste, ni hables de reglas, frases o formatos. Respondé en 1 o 2 frases con una única pregunta concreta sobre su negocio que te ayude a terminar la propuesta. Respuesta anterior: """${respuesta}"""`
+        : `Tu respuesta anterior hablaba de detalles internos (validaciones, formato de reglas, correcciones, herramientas). El usuario no debe ver eso. Reescribila en 1 o 2 frases hablando solo de su negocio: qué quedó en el panel o, si falta algo, una única pregunta concreta sobre sus datos. Respuesta anterior: """${respuesta}"""`,
     ),
     mensajes: conversacion,
     herramientas: herramientasDisponibles(calcularFase(estado)).map((n) => DEFINICIONES[n]),
@@ -284,7 +317,7 @@ async function vigilarDetallesInternos(
     signal,
   });
   const texto = reintento.texto?.trim() ?? "";
-  if (texto && !DETALLE_INTERNO.test(texto)) return texto;
+  if (texto && !DETALLE_INTERNO.test(texto) && !(sinRegistroValido && AFIRMA_PANEL.test(texto))) return texto;
   return null;
 }
 

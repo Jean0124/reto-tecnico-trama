@@ -70,6 +70,36 @@ describe("ejecutarTurno", () => {
     expect(devolucion).toContain("no está en esquema.clases");
   });
 
+  it("en el último intento registra sin las reglas que no pasan", async () => {
+    const malo = requerimientoValido();
+    malo.reglas_candidatas.push({ id: "R2", enunciado: "Si un Supervisor tiene muchas Salidas, se marca posible problema." });
+    const llm = new ClienteGuionado([
+      herramienta("registrar_requerimiento", malo),
+      herramienta("registrar_requerimiento", malo),
+      herramienta("registrar_requerimiento", malo),
+      texto("Te dejé la propuesta en el panel."),
+    ]);
+    const r = await ejecutarTurno({ llm, mensajes: conversacion(TEXTO_USUARIO), estado: estadoDelimitado() });
+    expect(r.estado.versiones).toHaveLength(1);
+    expect(r.estado.versiones[0].reglas_candidatas.map((x) => x.id)).toEqual(["R1"]);
+    expect(r.eventos).toContainEqual({ tipo: "reglas_descartadas", reglas: ["R2"] });
+    expect(r.respuesta).toBe("Te dejé la propuesta en el panel.");
+  });
+
+  it("si no registró nada, no puede decir que dejó el requerimiento en el panel", async () => {
+    const llm = new ClienteGuionado([
+      herramienta("registrar_requerimiento", { necesidad: "x" }),
+      herramienta("registrar_requerimiento", { necesidad: "y" }),
+      herramienta("registrar_requerimiento", { necesidad: "z" }),
+      texto("Ya dejé el requerimiento en el panel para que lo revises."),
+      texto("¿Los conteos físicos los hacen en todas las bodegas el mismo día?"),
+    ]);
+    const r = await ejecutarTurno({ llm, mensajes: conversacion(TEXTO_USUARIO), estado: estadoDelimitado() });
+    expect(r.estado.versiones).toHaveLength(0);
+    expect(r.eventos).toContainEqual({ tipo: "detalle_interno_bloqueado" });
+    expect(r.respuesta).toBe("¿Los conteos físicos los hacen en todas las bodegas el mismo día?");
+  });
+
   it("si sigue inválida, no se registra nada y el agente pide lo que falta", async () => {
     const llm = new ClienteGuionado([
       herramienta("registrar_requerimiento", "{json roto"),

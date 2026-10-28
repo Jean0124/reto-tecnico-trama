@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { cifrasNoAportadas, validarRequerimiento } from "@/lib/interview/validation";
+import { cifrasNoAportadas, rescatarRequerimiento, validarRequerimiento } from "@/lib/interview/validation";
 import { requerimientoValido, TEXTO_USUARIO } from "./helpers/fixtures";
 
 describe("validarRequerimiento", () => {
@@ -128,5 +128,31 @@ describe("cifrasNoAportadas", () => {
 
   it("no marca umbrales en días o meses", () => {
     expect(cifrasNoAportadas("en los 60 días previos a la salida", "")).toEqual([]);
+  });
+});
+
+describe("rescatarRequerimiento", () => {
+  const conReglaMala = () => {
+    const req = requerimientoValido();
+    req.reglas_candidatas.push({ id: "R2", enunciado: "Si un Supervisor tiene más de 7 Salidas, se marca posible problema." });
+    req.fuentes_requeridas[1].columnas_minimas.push({ nombre: "fecha_evaluacion", justifica: ["R2"] });
+    req.fuentes_requeridas[1].columnas_minimas[2].justifica.push("R2");
+    return req;
+  };
+
+  it("descarta solo las reglas que no pasan y limpia sus referencias", () => {
+    expect(validarRequerimiento(conReglaMala(), TEXTO_USUARIO).ok).toBe(false);
+    const r = rescatarRequerimiento(conReglaMala(), TEXTO_USUARIO);
+    expect(r?.descartadas).toEqual(["R2"]);
+    expect(r?.requerimiento.reglas_candidatas.map((x) => x.id)).toEqual(["R1"]);
+    const columnas = r?.requerimiento.fuentes_requeridas[1].columnas_minimas.map((c) => c.nombre);
+    expect(columnas).not.toContain("fecha_evaluacion");
+    expect(columnas).toContain("supervisor_id");
+  });
+
+  it("no rescata si el problema no son las reglas", () => {
+    const req = requerimientoValido();
+    req.esquema.relaciones.push({ sujeto: "Empleado", predicado: "x", objeto: "Sede" });
+    expect(rescatarRequerimiento(req, TEXTO_USUARIO)).toBeNull();
   });
 });
