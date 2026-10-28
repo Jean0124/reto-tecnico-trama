@@ -1,8 +1,8 @@
 # Transcripción — entrevista Trama
 
-Fecha: 2026-10-27T04:50:36.266Z  
+Fecha: 2026-10-28T02:20:35.594Z  
 Estado: confirmado  
-Versiones del requerimiento: 3
+Versiones del requerimiento: 4
 
 ## Conversación
 
@@ -12,45 +12,40 @@ Contame con tus palabras qué está pasando. Por ejemplo: "se nos está yendo ge
 
 **Usuario:** Se nos está yendo mucha gente de operaciones y no sabemos por qué.
 
-**Agente:** ¿Querés decidir sobre algo puntual para retener esa gente o solo quieren entender las causas de la salida? También me ayuda saber si "gente de operaciones" es una unidad, área o tipo de trabajo específico para incluirlo.
+**Agente:** Gracias por compartirlo. ¿Qué decisión quieren tomar para abordar la salida de gente? Por ejemplo, ¿quieren decidir sobre ajustes salariales, cambios en turnos, jefaturas, o algo distinto? Además, ¿en qué período les interesa analizar este fenómeno?
 
 **Usuario:** Queremos decidir si cambiamos el esquema de turnos rotativos o si cambiamos a algunos supervisores.
 
-**Agente:** Perfecto. Para enfocarnos: ¿querés que analicemos solo a las personas que se fueron en un período reciente? Si es así, ¿cuál período te interesa? Además, ¿esa “gente de operaciones” corresponde a una unidad o área específica?
+**Agente:** Perfecto, entonces la decisión estará entre ajustar turnos o cambiar supervisores. Para orientar el análisis, ¿en qué período quieren evaluar las salidas o cambios en el equipo de operaciones? ¿Los últimos meses, un año, o un período distinto?
 
-**Usuario:** Empezó hace unos 8 meses en el área de operaciones. Sospechamos que la gente renuncia en los 60 días siguientes a que la pasan al turno de noche, y también que hay supervisores a los que se les va más gente que a otros.
+**Usuario:** Empezó hace unos 8 meses en el área de operaciones. Sospechamos que la gente renuncia en los 60 días siguientes a que la pasan al turno de noche, y también que a algunos supervisores se les va más gente que a otros. Para nosotros es mucho si a un supervisor se le van más de 3 personas en el período.
 
-**Agente:** Te propuse pedir datos sobre colaboradores, turnos, supervisores y áreas de Operaciones de los últimos 8 meses, con reglas para detectar si la rotación a turno de noche o ciertos supervisores están relacionados con renuncias. Revisalo en el panel y me decís si querés hacer algún ajuste o confirmás para seguir.
+**Agente:** Te propuse un requerimiento para analizar la salida de colaboradores en operaciones, con las reglas que plantean que renuncian tras ir al turno de noche y que algunos supervisores pierden más gente. Incluye datos de colaboradores, turnos, supervisores y salidas, con preguntas abiertas para aclarar detalles sobre los turnos y supervisores. Por favor, revisá todo eso en el panel y confirmá o pedime ajustes.
 
-**Usuario:** Tenemos la nómina en Excel con id del colaborador, fecha de ingreso, fecha de salida (día, mes y año) y motivo de salida. Las asignaciones están en un CSV con id del colaborador, turno, id del supervisor, fecha desde y fecha hasta.
+**Usuario:** Tenemos la nómina en Excel con id del colaborador, fecha de ingreso, fecha de salida y motivo de salida. Las asignaciones están en un CSV con id del colaborador, turno, id del supervisor, fecha desde y fecha hasta.
 
-**Agente:** Gracias por la info. Para el motivo de salida, ¿querés que lo usemos para distinguir renuncias de otras causas y así afinar el análisis? También, ¿el turno en el CSV identifica claramente cuál es el turno de noche?
+**Agente:** Incorporé la información de que la nómina está en Excel con las columnas de ID, fecha de ingreso, salida y motivo, y que la asignación de turnos y supervisores está en CSV con esas columnas y períodos. Ahora, ¿los turnos en ese CSV permiten identificar claramente cuál es el turno de noche? ¿Y cómo está registrado el supervisor que tenía cada colaborador en cada período?
 
 **Usuario:** ¿Entonces la causa son los turnos de noche, cierto?
 
-**Agente:** El motor podrá verificar si renuncias ocurren tras pasar al turno de noche, según tu sospecha, pero necesita saber qué asignaciones corresponden al turno de noche y cuándo suceden los cambios. ¿Podés confirmar si tu registro de turnos permite identificar eso claramente?
-
-**Usuario:** Pregunta	Respuesta
-Cuántas salidas son “muchas” para un supervisor
-
-**Agente:** Esa es una buena pregunta abierta para definir. ¿Tienen algún criterio o número aproximado que consideren un umbral para marcar a un supervisor con muchas renuncias? Si no, lo dejamos abierto para definir más adelante.
-
-**Usuario:** Consideremos que es mucho si a un supervisor se le fueron más de 3 personas en el período.
-
-**Agente:** Definimos entonces que un supervisor tiene muchas renuncias si pierde más de 3 colaboradores en este período. Te propuse un esquema con eso y otros detalles para cargar datos sobre colaboradores, turnos, supervisores y áreas. Revisa el requerimiento en el panel y me decís si querés ajustar o confirmar para avanzar.
+**Agente:** El motor podrá verificar si la salida está relacionada con el paso al turno de noche según la regla que propuse, pero la causa la decidirán ustedes al interpretar esos resultados. Yo solo te ayudo a preparar los datos y las hipótesis para que el motor las analice. ¿Querés que siga registrando esta hipótesis y los datos asociados?
 
 **Usuario:** Quiero ajustar: el motivo de salida es texto libre, no tiene categorías. Y agrega también las evaluaciones de desempeño, las tenemos en PDF con id del colaborador, fecha, id del supervisor y un puntaje de 1 a 5.
 
-**Agente:** Agregué la clase y fuente de Evaluaciones de desempeño en PDF, manteniendo las otras fuentes y variables, y aclaré que el motivo de salida es texto libre. Revisá este ajuste en el panel y decime si querés más cambios o lo confirmás para avanzar.
+**Agente:** Actualicé el requerimiento para reflejar que el motivo de salida es texto libre y agregué las evaluaciones de desempeño en PDF con las columnas que mencionaste. Revisalo en el panel y avisame si querés ajustar algo más o confirmar.
 
-**Agente:** Listo: confirmaste la versión 3 del requerimiento. Con esto el siguiente paso es cargar esas fuentes en Trama para que el motor las cruce. La entrevista queda cerrada.
+**Usuario:** En la columna turno dice “Día”, “Tarde” o “Noche”, y cada fila del CSV tiene el supervisor que tenía el colaborador en ese período. Para nosotros un puntaje bajo es menor a 3.
 
-## Requerimiento resultante (versión 3)
+**Agente:** Incorporé que en la columna turno el valor “Noche” identifica ese turno, y que el supervisor está asignado por período para cada colaborador. También quedó registrado que el puntaje bajo en desempeño es menor a 3. Revisalo en el panel y confirmá o pedime ajustes.
+
+**Agente:** Listo: confirmaste la versión 4 del requerimiento. Con esto el siguiente paso es cargar esas fuentes en Trama para que el motor las cruce. La entrevista queda cerrada.
+
+## Requerimiento resultante (versión 4)
 
 ```json
 {
-  "necesidad": "Determinar si la rotación de turnos o la asignación de supervisores están relacionadas con renuncias en el área de operaciones, considerando que motivo de salida es texto libre y añadiendo información de evaluaciones de desempeño.",
-  "decision_objetivo": "decidir si cambiamos el esquema de turnos rotativos o si cambiamos a algunos supervisores",
+  "necesidad": "Analizar la salida de colaboradores en el área de operaciones para decidir entre ajustar turnos rotativos o cambiar algunos supervisores",
+  "decision_objetivo": "Decidir entre ajustar el esquema de turnos rotativos o cambiar algunos supervisores para reducir la salida de gente en el área de operaciones",
   "alcance": {
     "periodo": "últimos 8 meses",
     "unidades": [
@@ -62,8 +57,8 @@ Cuántas salidas son “muchas” para un supervisor
       "Colaborador",
       "Turno",
       "Supervisor",
-      "Área",
-      "EvaluaciónDeDesempeño"
+      "Salida",
+      "EvaluacionDesempeno"
     ],
     "relaciones": [
       {
@@ -77,17 +72,12 @@ Cuántas salidas son “muchas” para un supervisor
         "objeto": "Supervisor"
       },
       {
-        "sujeto": "Colaborador",
-        "predicado": "perteneceA",
-        "objeto": "Área"
-      },
-      {
-        "sujeto": "EvaluaciónDeDesempeño",
-        "predicado": "correspondeA",
+        "sujeto": "EvaluacionDesempeno",
+        "predicado": "de",
         "objeto": "Colaborador"
       },
       {
-        "sujeto": "EvaluaciónDeDesempeño",
+        "sujeto": "EvaluacionDesempeno",
         "predicado": "realizadaPor",
         "objeto": "Supervisor"
       }
@@ -96,94 +86,92 @@ Cuántas salidas son “muchas” para un supervisor
   "reglas_candidatas": [
     {
       "id": "R1",
-      "enunciado": "Si un Colaborador cambia al turno de noche, y renuncia dentro de los 60 días siguientes, se marca el hecho."
+      "enunciado": "Si un Colaborador pasó al Turno de noche y en los 60 días siguientes tiene una Salida, se marca ese hecho"
     },
     {
       "id": "R2",
-      "enunciado": "Si un Supervisor tiene un número de renuncias en su equipo mayor que 3 en el período, se marca ese Supervisor."
+      "enunciado": "Si un Supervisor tiene más de N Salidas de Colaboradores que reportan a él en el período, se marca ese hecho con N=3"
+    },
+    {
+      "id": "R3",
+      "enunciado": "Si una EvaluacionDesempeno tiene un puntaje menor a P en el período de 60 días anteriores a la Salida del Colaborador, se marca ese hecho con P=3"
     }
   ],
   "fuentes_requeridas": [
     {
-      "nombre": "Catálogo de colaboradores",
+      "nombre": "Nómina de colaboradores",
       "tipo": "excel",
       "columnas_minimas": [
         {
-          "nombre": "colaborador_id",
+          "nombre": "ID_Colaborador",
           "justifica": [
             "R1",
-            "R2"
+            "R2",
+            "R3"
           ]
         },
         {
-          "nombre": "fecha_ingreso",
+          "nombre": "Fecha_Ingreso",
           "justifica": [
             "R1"
           ]
         },
         {
-          "nombre": "fecha_baja",
+          "nombre": "Fecha_Salida",
           "justifica": [
             "R1",
-            "R2"
+            "R2",
+            "R3"
           ]
         },
         {
-          "nombre": "motivo_baja",
+          "nombre": "Motivo_Salida",
           "justifica": [
             "R1",
-            "R2"
-          ]
-        },
-        {
-          "nombre": "supervisor_id",
-          "justifica": [
-            "R2"
-          ]
-        },
-        {
-          "nombre": "area_id",
-          "justifica": [
-            "R1",
-            "R2"
+            "R2",
+            "R3"
           ]
         }
       ],
       "justifica": [
         "R1",
-        "R2"
+        "R2",
+        "R3"
       ]
     },
     {
-      "nombre": "Asignación de turnos",
+      "nombre": "Asignación de turnos y supervisores",
       "tipo": "csv",
       "columnas_minimas": [
         {
-          "nombre": "colaborador_id",
+          "nombre": "ID_Colaborador",
+          "justifica": [
+            "R1",
+            "R2",
+            "R3"
+          ]
+        },
+        {
+          "nombre": "Turno",
           "justifica": [
             "R1"
           ]
         },
         {
-          "nombre": "turno_id",
+          "nombre": "ID_Supervisor",
+          "justifica": [
+            "R2",
+            "R3"
+          ]
+        },
+        {
+          "nombre": "Fecha_Desde",
           "justifica": [
             "R1"
           ]
         },
         {
-          "nombre": "supervisor_id",
-          "justifica": [
-            "R2"
-          ]
-        },
-        {
-          "nombre": "fecha_desde",
-          "justifica": [
-            "R1"
-          ]
-        },
-        {
-          "nombre": "fecha_hasta",
+          "nombre": "Fecha_Hasta",
           "justifica": [
             "R1"
           ]
@@ -191,73 +179,8 @@ Cuántas salidas son “muchas” para un supervisor
       ],
       "justifica": [
         "R1",
-        "R2"
-      ]
-    },
-    {
-      "nombre": "Turnos",
-      "tipo": "excel",
-      "columnas_minimas": [
-        {
-          "nombre": "turno_id",
-          "justifica": [
-            "R1"
-          ]
-        },
-        {
-          "nombre": "nombre_turno",
-          "justifica": [
-            "R1"
-          ]
-        }
-      ],
-      "justifica": [
-        "R1"
-      ]
-    },
-    {
-      "nombre": "Supervisores",
-      "tipo": "excel",
-      "columnas_minimas": [
-        {
-          "nombre": "supervisor_id",
-          "justifica": [
-            "R2"
-          ]
-        },
-        {
-          "nombre": "nombre_supervisor",
-          "justifica": [
-            "R2"
-          ]
-        }
-      ],
-      "justifica": [
-        "R2"
-      ]
-    },
-    {
-      "nombre": "Áreas",
-      "tipo": "excel",
-      "columnas_minimas": [
-        {
-          "nombre": "area_id",
-          "justifica": [
-            "R1",
-            "R2"
-          ]
-        },
-        {
-          "nombre": "nombre_area",
-          "justifica": [
-            "R1",
-            "R2"
-          ]
-        }
-      ],
-      "justifica": [
-        "R1",
-        "R2"
+        "R2",
+        "R3"
       ]
     },
     {
@@ -265,44 +188,36 @@ Cuántas salidas son “muchas” para un supervisor
       "tipo": "pdf",
       "columnas_minimas": [
         {
-          "nombre": "colaborador_id",
+          "nombre": "ID_Colaborador",
           "justifica": [
-            "R1",
-            "R2"
+            "R3"
           ]
         },
         {
-          "nombre": "fecha",
+          "nombre": "Fecha",
           "justifica": [
-            "R1",
-            "R2"
+            "R3"
           ]
         },
         {
-          "nombre": "supervisor_id",
+          "nombre": "ID_Supervisor",
           "justifica": [
-            "R2"
+            "R3"
           ]
         },
         {
-          "nombre": "puntaje",
+          "nombre": "Puntaje",
           "justifica": [
-            "R2"
+            "R3"
           ]
         }
       ],
       "justifica": [
-        "R1",
-        "R2"
+        "R3"
       ]
     }
   ],
-  "preguntas_abiertas": [
-    "¿Existen registros que indiquen cambios de turno con fecha?",
-    "¿Hay un catálogo que identifique qué turno es 'noche'?",
-    "¿Las bajas están registradas con fecha",
-    "¿Cómo interpretamos el texto libre en motivo de baja para saber si es renuncia?"
-  ],
+  "preguntas_abiertas": [],
   "completitud": "suficiente_para_confirmar"
 }
 ```
