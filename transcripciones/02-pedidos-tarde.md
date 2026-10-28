@@ -1,6 +1,6 @@
 # Transcripción — entrevista Trama
 
-Fecha: 2026-10-27T02:29:53.457Z  
+Fecha: 2026-10-28T02:40:51.528Z  
 Estado: confirmado  
 Versiones del requerimiento: 3
 
@@ -10,33 +10,29 @@ Versiones del requerimiento: 3
 
 Contame con tus palabras qué está pasando. Por ejemplo: "se nos está yendo gente de operaciones" o "el inventario no cuadra".
 
-**Usuario:** Los pedidos están llegando tarde a los clientes y nos están llegando muchos reclamos
+**Usuario:** Los pedidos están llegando tarde a los clientes y nos están llegando muchos reclamos.
 
-**Agente:** Gracias. Para entender mejor: ¿qué decisión quieren tomar para resolver los pedidos que llegan tarde y los reclamos? Por ejemplo, ¿quieren ajustar la logística, revisar la gestión de pedidos o analizar los reclamos? También me ayudaría saber desde cuándo ocurre este problema o en qué período quieren analizarlo.
+**Agente:** Gracias por contarme. ¿Qué decisión pretenden tomar para resolver que los pedidos llegan tarde y generan reclamos? ¿Por ejemplo, quieren ajustar procesos, reasignar recursos o mejorar las rutas? Además, ¿a qué período se refiere el problema: últimos meses, semanas o días?
 
 **Usuario:** Queremos decidir si contratamos más repartidores o si cambiamos cómo armamos las rutas.
 
-**Agente:** Perfecto, ya tenemos la decisión: contratar más repartidores o cambiar el armado de rutas. Ahora, para acotar el análisis, ¿en qué período quieren revisar la llegada tardía de los pedidos y los reclamos? ¿Por ejemplo, las últimas semanas, meses o un período específico?
+**Agente:** Perfecto, entonces la decisión es comparar contratar más repartidores versus cambiar la planificación de rutas. ¿Tienen registradas las rutas actuales y los repartidores asignados a cada pedido, así como fechas de entrega y registros de reclamos? ¿En qué período quieren analizarlo?
 
-**Usuario:** Empezó hace unos 4 meses, desde que abrimos la zona norte. Sospechamos que las rutas de esa zona son demasiado largas.
+**Usuario:** Empezó hace unos 4 meses, desde que abrimos la zona norte. Sospechamos que las rutas de esa zona son demasiado largas o que los repartidores están sobrecargados. Para nosotros una ruta es larga si tiene más de 15 paradas, y un repartidor está sobrecargado si hace más de 2 rutas en un mismo día.
 
-**Agente:** Gracias por el detalle. Para el análisis propongo incluir las clases Pedido, Reclamo, Repartidor, Ruta y Zona, con datos de los últimos 4 meses y focalizados en la zona norte. Para evaluar si las rutas son demasiado largas, ¿tienen registros de la duración o distancia de cada ruta, o cómo miden la longitud o el tiempo de las rutas?
+**Agente:** Propuse un requerimiento que incluye clases para pedido, repartidor, ruta, reclamo y zona, con reglas para identificar rutas largas, repartidores sobrecargados, retrasos y reclamos relacionados, todo enfocado en la zona norte y últimos 4 meses. Además, pedí los registros de pedidos, rutas y reclamos con las columnas necesarias para verificar esas reglas. Revisalo y si está bien, confirmalo o decime si querés ajustes.
 
-**Usuario:** En el sistema de pedidos tenemos la hora prometida y la hora real de entrega. Las rutas tienen asignado un repartidor, la zona y el número de paradas, pero no la distancia.
+**Usuario:** Los pedidos los exportamos del sistema en CSV con id del pedido, cliente, hora prometida, hora real de entrega e id de la ruta. Las rutas están en Excel con id de la ruta, fecha, id del repartidor, zona (Norte, Sur o Centro) y número de paradas reales, pero no la distancia. Los reclamos los tenemos en Excel con id del pedido, fecha y motivo. El id del pedido es el mismo en todos los archivos y las horas están en hora de Colombia.
 
-**Agente:** Propuse un modelo basado en tus datos de pedidos con horas prometidas y reales, reclamos, repartidores, rutas y zonas, para analizar si las rutas con muchas paradas en zona norte generan demoras y reclamos, y así apoyar la decisión sobre repartidores o armado de rutas. También dejé abierta la pregunta de cuántas paradas considerarías muchas. Podés revisar el modelo en el panel y confirmarlo o pedir ajustes.
+**Agente:** Actualicé el requerimiento para que incluya las fuentes y columnas mínimas según tus exportaciones: pedidos en CSV con id, horas y ruta; rutas en Excel con id, fecha, repartidor, zona y número de paradas; reclamos en Excel con id pedido, fecha y motivo. Está listo para que lo revises y confirmes o pidas ajustes.
 
-**Usuario:** “¿Qué porcentaje de pedidos crees que llega tarde por la zona norte?”
+**Usuario:** ¿Qué porcentaje de pedidos crees que llega tarde por la zona norte?
 
-**Agente:** Esa pregunta la podrá responder el motor una vez que confirmes los datos para analizar. ¿Querés avanzar con la revisión del requerimiento que te proponí para que el motor haga esas verificaciones?
+**Agente:** Esa pregunta la podrá responder el motor una vez tengas los datos cargados y confirmes el requerimiento. Por ahora, seguimos ajustando qué datos y reglas necesita para el análisis; ¿querés que te aclare algo del requerimiento?
 
-**Usuario:** Quiero ajustar: Quiero ajustar: los reclamos no los tenemos en Excel, salen de una exportación del CRM
+**Usuario:** Quiero ajustar: los reclamos no los tenemos en Excel, salen de una exportación del CRM.
 
-**Agente:** Listo, ajusté el requerimiento para que la fuente de reclamos sea una exportación del CRM, no un Excel. Por favor revisá el cambio en el panel y confirmalo o pedime más ajustes.
-
-**Usuario:** Consideremos larga una ruta con más de 15 paradas.
-
-**Agente:** Consideré tu parámetro de más de 15 paradas para definir una ruta larga y ajusté el requerimiento con la fuente de reclamos desde el CRM. Podés revisar todo el modelo en el panel y confirmarlo o pedirme ajustes.
+**Agente:** Actualicé el requerimiento para que el origen de los reclamos sea una exportación del CRM, con las columnas id del pedido, fecha y motivo. Revisalo en el panel y confirmá o pedime ajustes.
 
 **Agente:** Listo: confirmaste la versión 3 del requerimiento. Con esto el siguiente paso es cargar esas fuentes en Trama para que el motor las cruce. La entrevista queda cerrada.
 
@@ -44,8 +40,8 @@ Contame con tus palabras qué está pasando. Por ejemplo: "se nos está yendo ge
 
 ```json
 {
-  "necesidad": "Contrastar si la causa del retraso en los pedidos y el incremento de reclamos es que las rutas en la zona norte son demasiado largas, para decidir sobre contratar más repartidores o cambiar el armado de rutas.",
-  "decision_objetivo": "Decidir entre contratar más repartidores o cambiar el armado de rutas",
+  "necesidad": "Evitar retrasos en pedidos y muchos reclamos en zona norte, decidiendo si contratar más repartidores o cambiar cómo armar rutas",
+  "decision_objetivo": "Decidir entre contratar más repartidores o cambiar cómo armar las rutas para evitar retrasos en los pedidos",
   "alcance": {
     "periodo": "últimos 4 meses",
     "unidades": [
@@ -55,26 +51,26 @@ Contame con tus palabras qué está pasando. Por ejemplo: "se nos está yendo ge
   "esquema": {
     "clases": [
       "Pedido",
-      "Reclamo",
       "Repartidor",
       "Ruta",
+      "Reclamo",
       "Zona"
     ],
     "relaciones": [
       {
         "sujeto": "Pedido",
-        "predicado": "reportaA",
-        "objeto": "Reclamo"
+        "predicado": "asignadoA",
+        "objeto": "Ruta"
       },
       {
-        "sujeto": "Pedido",
+        "sujeto": "Ruta",
         "predicado": "asignadoA",
         "objeto": "Repartidor"
       },
       {
-        "sujeto": "Ruta",
-        "predicado": "asignadaA",
-        "objeto": "Repartidor"
+        "sujeto": "Pedido",
+        "predicado": "reportaA",
+        "objeto": "Reclamo"
       },
       {
         "sujeto": "Ruta",
@@ -86,68 +82,61 @@ Contame con tus palabras qué está pasando. Por ejemplo: "se nos está yendo ge
   "reglas_candidatas": [
     {
       "id": "R1",
-      "enunciado": "Si un Pedido en la zona norte se entregó después de la hora prometida, se marca entrega tardía."
+      "enunciado": "Si una Ruta tiene más de 15 paradas en un día, se marca como ruta larga"
     },
     {
       "id": "R2",
-      "enunciado": "Si un Pedido con entrega tardía tiene un Reclamo asociado, se marca reclamo por entrega tardía."
+      "enunciado": "Si un Repartidor hace más de 2 Rutas en un mismo día, se marca como Repartidor sobrecargado"
     },
     {
       "id": "R3",
-      "enunciado": "Si una Ruta en la zona norte tiene un número de paradas mayor a 15, se marca como ruta posiblemente demasiado larga."
+      "enunciado": "Si un Pedido asignado a una Ruta se entrega con retraso, se marca el hecho"
     },
     {
       "id": "R4",
-      "enunciado": "Si un Repartidor tiene asignadas varias Rutas con rutas posiblemente demasiado largas, se marca saturación potencial del repartidor."
+      "enunciado": "Si un Pedido con retraso registra un Reclamo, se marca el hecho"
+    },
+    {
+      "id": "R5",
+      "enunciado": "Si una Ruta pertenece a la Zona Norte, se considera para el análisis"
     }
   ],
   "fuentes_requeridas": [
     {
-      "nombre": "Sistema de Pedidos",
-      "tipo": "excel",
+      "nombre": "Pedidos",
+      "tipo": "csv",
       "columnas_minimas": [
         {
-          "nombre": "ID Pedido",
+          "nombre": "idPedido",
+          "justifica": [
+            "R3",
+            "R4"
+          ]
+        },
+        {
+          "nombre": "horaPrometida",
+          "justifica": [
+            "R3"
+          ]
+        },
+        {
+          "nombre": "horaRealEntrega",
+          "justifica": [
+            "R3"
+          ]
+        },
+        {
+          "nombre": "idRuta",
           "justifica": [
             "R1",
-            "R2"
-          ]
-        },
-        {
-          "nombre": "Fecha de Entrega",
-          "justifica": [
-            "R1"
-          ]
-        },
-        {
-          "nombre": "Hora Prometida",
-          "justifica": [
-            "R1"
-          ]
-        },
-        {
-          "nombre": "Hora Real de Entrega",
-          "justifica": [
-            "R1"
-          ]
-        },
-        {
-          "nombre": "ID Reclamo",
-          "justifica": [
-            "R2"
-          ]
-        },
-        {
-          "nombre": "ID Repartidor",
-          "justifica": [
-            "R1",
-            "R2"
+            "R3"
           ]
         }
       ],
       "justifica": [
         "R1",
-        "R2"
+        "R3",
+        "R4"
       ]
     },
     {
@@ -155,49 +144,70 @@ Contame con tus palabras qué está pasando. Por ejemplo: "se nos está yendo ge
       "tipo": "excel",
       "columnas_minimas": [
         {
-          "nombre": "ID Ruta",
+          "nombre": "idRuta",
           "justifica": [
-            "R3",
-            "R4"
+            "R1",
+            "R2",
+            "R5"
           ]
         },
         {
-          "nombre": "ID Repartidor",
+          "nombre": "fechaRuta",
           "justifica": [
-            "R4"
+            "R1",
+            "R2"
           ]
         },
         {
-          "nombre": "Zona",
+          "nombre": "numeroParadas",
           "justifica": [
-            "R3"
+            "R1"
           ]
         },
         {
-          "nombre": "Número de Paradas",
-          "justifica": [
-            "R3"
-          ]
-        }
-      ],
-      "justifica": [
-        "R3",
-        "R4"
-      ]
-    },
-    {
-      "nombre": "Reclamos CRM Export",
-      "tipo": "crm-export",
-      "columnas_minimas": [
-        {
-          "nombre": "ID Reclamo",
+          "nombre": "idRepartidor",
           "justifica": [
             "R2"
           ]
+        },
+        {
+          "nombre": "zona",
+          "justifica": [
+            "R5"
+          ]
         }
       ],
       "justifica": [
-        "R2"
+        "R1",
+        "R2",
+        "R5"
+      ]
+    },
+    {
+      "nombre": "Reclamos",
+      "tipo": "crm-export",
+      "columnas_minimas": [
+        {
+          "nombre": "idPedido",
+          "justifica": [
+            "R4"
+          ]
+        },
+        {
+          "nombre": "fechaReclamo",
+          "justifica": [
+            "R4"
+          ]
+        },
+        {
+          "nombre": "motivo",
+          "justifica": [
+            "R4"
+          ]
+        }
+      ],
+      "justifica": [
+        "R4"
       ]
     }
   ],
