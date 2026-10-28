@@ -96,6 +96,8 @@ export async function ejecutarTurno(params: {
   let vacias = 0;
   /** El modelo dijo que cambió el requerimiento sin registrarlo: se lo obliga a registrar (una vez). */
   let accionSinRegistro = false;
+  /** El usuario contestó (sin preguntar nada) mientras había preguntas abiertas: hay que registrar la versión sin ellas. */
+  const respondePendientes = respondePreguntasAbiertas(params.estado, params.mensajes);
 
   for (let paso = 0; paso < MAX_PASOS; paso++) {
     if (signal?.aborted) throw new ErrorLLM("timeout", "Se agotó el tiempo del turno");
@@ -107,7 +109,7 @@ export async function ejecutarTurno(params: {
 
     let eleccion: EleccionHerramienta = "auto";
     if (registroEnEsteTurno || agotoIntentos) eleccion = "ninguna";
-    else if (debeForzarRegistro(estado) || forzarPorVacia || accionSinRegistro)
+    else if (debeForzarRegistro(estado) || forzarPorVacia || accionSinRegistro || respondePendientes)
       eleccion = { nombre: "registrar_requerimiento" };
 
     const nota = agotoIntentos
@@ -116,7 +118,9 @@ export async function ejecutarTurno(params: {
         ? "El requerimiento quedó registrado y ya se ve en el panel. Ahora respondé al usuario en 1 o 2 frases: qué propusiste y que lo revise para confirmarlo o pedir ajustes."
         : accionSinRegistro
           ? "Le dijiste al usuario que cambiaste el requerimiento, pero no llamaste a registrar_requerimiento, así que el panel no cambió. Registrá ahora la versión completa con ese cambio."
-          : vacias > 0
+          : respondePendientes
+            ? "El usuario está respondiendo preguntas abiertas del requerimiento. Registrá ahora la versión completa: incorporá lo que respondió y sacá de preguntas_abiertas las que ya quedaron contestadas."
+            : vacias > 0
             ? "Tu respuesta anterior llegó vacía. Respondé ahora: llamá a la herramienta que corresponda o escribile al usuario en 1 o 2 frases."
             : undefined;
 
@@ -315,6 +319,17 @@ async function vigilarCifras(
 }
 
 /** El texto promete armar o registrar algo "ahora" sin haberlo hecho ("un momento", "ahora preparo…"). */
+/**
+ * En revisión, si el requerimiento tiene preguntas abiertas y el usuario escribe
+ * algo que no es una pregunta, lo tomamos como respuesta: se registra una versión
+ * nueva para que no queden en el panel preguntas ya contestadas.
+ */
+export function respondePreguntasAbiertas(estado: EstadoEntrevista, mensajes: MensajeChat[]): boolean {
+  const actual = estado.versiones.at(-1);
+  const ultimo = [...mensajes].reverse().find((m) => m.rol === "usuario");
+  return Boolean(actual && actual.preguntas_abiertas.length > 0 && ultimo && !ultimo.contenido.includes("?"));
+}
+
 export function prometeAccion(texto: string): boolean {
   return /\b(un momento|ahora (?:preparo|armo|registro|lo registro)|voy a (?:preparar|registrar|armar|proponer)|preparo y registro|en breve)\b/i.test(
     texto,

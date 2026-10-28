@@ -252,6 +252,34 @@ describe("promesas sin acción", () => {
     expect(r.estado.versiones).toHaveLength(1);
     expect(r.respuesta).toBe("Te dejé la propuesta en el panel.");
   });
+
+  it("si el usuario responde preguntas abiertas, obliga a registrar la versión sin ellas", async () => {
+    const conPendientes = { ...requerimientoValido(), preguntas_abiertas: ["¿Los ids son los mismos en todos los archivos?"] };
+    const estado = { ...estadoDelimitado(), versiones: [conPendientes] };
+    const llm = new ClienteGuionado([
+      herramienta("registrar_requerimiento", { ...requerimientoValido(), preguntas_abiertas: [] }),
+      texto("Listo, ya no quedan pendientes."),
+    ]);
+    const r = await ejecutarTurno({
+      llm,
+      mensajes: conversacion(TEXTO_USUARIO, "Te dejé la propuesta.", "Sí, los ids son los mismos en todos los archivos."),
+      estado,
+    });
+    expect(llm.peticiones[0].eleccion).toEqual({ nombre: "registrar_requerimiento" });
+    expect(r.estado.versiones).toHaveLength(2);
+    expect(r.estado.versiones[1].preguntas_abiertas).toEqual([]);
+  });
+
+  it("si el usuario hace una pregunta, no se fuerza el registro aunque haya pendientes", async () => {
+    const conPendientes = { ...requerimientoValido(), preguntas_abiertas: ["¿Los ids son los mismos?"] };
+    const llm = new ClienteGuionado([texto("Eso lo verifica el motor después.")]);
+    await ejecutarTurno({
+      llm,
+      mensajes: conversacion(TEXTO_USUARIO, "Te dejé la propuesta.", "¿Cuánta plata estamos perdiendo?"),
+      estado: { ...estadoDelimitado(), versiones: [conPendientes] },
+    });
+    expect(llm.peticiones[0].eleccion).toBe("auto");
+  });
 });
 
 describe("detalles internos", () => {
