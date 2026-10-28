@@ -74,6 +74,7 @@ describe("reglas verificables", () => {
   it.each([
     "Si una ruta tiene muchas paradas, podría estar afectando la puntualidad.",
     "Si un pedido tiene un reclamo, indica insatisfacción.",
+    "Si hay un reclamo asociado a un pedido retrasado, se marca el reclamo como indicativo de problema en la entrega.",
     "Si una devolución se marca como posible causa.",
     "Si los reclamos aumentan de forma significativa, se marca.",
     "Si una ruta tiene más de 15 paradas, se marca como ruta posiblemente demasiado larga.",
@@ -94,6 +95,16 @@ describe("reglas verificables", () => {
     req.reglas_candidatas[0].enunciado =
       "Si una devolución de las notas crédito no está registrada en los movimientos del ERP para la misma bodega y producto, se marca una inconsistencia.";
     expect(validarRequerimiento(req, TEXTO_USUARIO).ok).toBe(true);
+  });
+
+  it("rechaza umbrales que el usuario no dio y acepta los que sí", () => {
+    const req = requerimientoValido();
+    req.reglas_candidatas[0].enunciado =
+      "Si una Evaluación tiene un puntaje menor a 3 en los 60 días previos a la Salida, se marca el hecho.";
+    const r = validarRequerimiento(req, TEXTO_USUARIO);
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.errores.join()).toContain('el umbral "3" no lo dijo el usuario');
+    expect(validarRequerimiento(req, `${TEXTO_USUARIO} un puntaje bajo es menor a 3`).ok).toBe(true);
   });
 
   it("acepta condiciones observables con umbral parametrizado", () => {

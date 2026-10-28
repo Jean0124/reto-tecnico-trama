@@ -27,7 +27,27 @@ export function validarRequerimiento(entrada: unknown, textoUsuario: string): Re
   errores.push(...cifrasNoAportadas(textoDelRequerimiento(req), textoUsuario).map(
     (c) => `aparece la cifra "${c}" que el usuario no aportó; el agente no puede afirmar resultados ni cifras`,
   ));
+  errores.push(...umbralesNoAportados(req, textoUsuario));
   return errores.length ? { ok: false, errores } : { ok: true, requerimiento: req };
+}
+
+/**
+ * Los umbrales de una regla ("más de 3 salidas", "60 días") tienen que salir de
+ * lo que dijo el usuario. Si no los dio, la regla usa un parámetro con nombre
+ * (N, P…) y la pregunta va a preguntas_abiertas: el agente no elige umbrales.
+ */
+export function umbralesNoAportados(req: RequerimientoMotor, textoUsuario: string): string[] {
+  const numero = /(?<![\p{L}\d.,])\d+(?:[.,]\d+)?(?![\p{L}\d])/gu;
+  const delUsuario = new Set(textoUsuario.match(numero) ?? []);
+  const errores: string[] = [];
+  for (const r of req.reglas_candidatas) {
+    const inventados = [...new Set(r.enunciado.match(numero) ?? [])].filter((n) => !delUsuario.has(n));
+    if (inventados.length)
+      errores.push(
+        `reglas_candidatas ${r.id}: el umbral ${inventados.map((n) => `"${n}"`).join(", ")} no lo dijo el usuario. Usá un parámetro con nombre (ej. "menor a P") y agregá a preguntas_abiertas cuál sería su valor`,
+      );
+  }
+  return errores;
 }
 
 const norm = (s: string) =>
@@ -39,7 +59,7 @@ const norm = (s: string) =>
 
 /** Palabras que convierten una regla en conclusión o especulación (no verificable por el motor). */
 export const REGLA_VAGA =
-  /\b(podr[ií]an?|puede[n]? (?:indicar|afectar|ser|estar)|indica(?:r[ií]a)?|posibles?|es (?:la )?causa|probablemente|posiblemente|potencial(?:es|mente)?|quiz[aá]s?|significativ[oa]s?|habr[aá]|recomendad[oa]s?|evidencia para decidir|si (?:aumentar|cambiar|reducir|hacer|mejorar|implementar)\w*)\b/i;
+  /\b(podr[ií]an?|puede[n]? (?:indicar|afectar|ser|estar)|indica(?:r[ií]a)?|indicativ[oa]s?|posibles?|es (?:la )?causa|probablemente|posiblemente|potencial(?:es|mente)?|quiz[aá]s?|significativ[oa]s?|habr[aá]|recomendad[oa]s?|evidencia para decidir|si (?:aumentar|cambiar|reducir|hacer|mejorar|implementar)\w*)\b/i;
 
 export function validarCoherencia(req: RequerimientoMotor): string[] {
   const errores: string[] = [];

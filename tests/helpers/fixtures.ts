@@ -61,4 +61,4 @@ export const estadoDelimitado = (extra: Partial<EstadoEntrevista> = {}): EstadoE
 });
 
 export const TEXTO_USUARIO =
-  "Se nos está yendo mucha gente de operaciones y no sabemos por qué. Queremos saber si es por los turnos rotativos o por los supervisores. Empezó hace unos 8 meses.";
+  "Se nos está yendo mucha gente de operaciones y no sabemos por qué. Queremos saber si es por los turnos rotativos o por los supervisores. Empezó hace unos 8 meses. Sospechamos que renuncian en los 60 días después de cambiarles el turno.";
