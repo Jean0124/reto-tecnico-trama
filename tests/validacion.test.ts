@@ -74,6 +74,7 @@ describe("reglas verificables", () => {
   it.each([
     "Si una ruta tiene muchas paradas, podría estar afectando la puntualidad.",
     "Si un pedido tiene un reclamo, indica insatisfacción.",
+    "Si una devolución de una nota de crédito no está en el ERP, puede explicar parte de la diferencia.",
     "Si hay un reclamo asociado a un pedido retrasado, se marca el reclamo como indicativo de problema en la entrega.",
     "Si una devolución se marca como posible causa.",
     "Si los reclamos aumentan de forma significativa, se marca.",

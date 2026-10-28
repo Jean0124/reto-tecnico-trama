@@ -62,7 +62,7 @@ const norm = (s: string) =>
 
 /** Palabras que convierten una regla en conclusión o especulación (no verificable por el motor). */
 export const REGLA_VAGA =
-  /\b(podr[ií]an?|puede[n]? (?:indicar|afectar|ser|estar)|indica(?:r[ií]a)?|indicativ[oa]s?|posibles?|es (?:la )?causa|probablemente|posiblemente|potencial(?:es|mente)?|quiz[aá]s?|significativ[oa]s?|habr[aá]|recomendad[oa]s?|evidencia para decidir|si (?:aumentar|cambiar|reducir|hacer|mejorar|implementar)\w*)\b/i;
+  /\b(podr[ií]an?|pued[ea]n?|explica(?:r|n|r[ií]a)?|indica(?:r[ií]a)?|indicativ[oa]s?|posibles?|es (?:la )?causa|probablemente|posiblemente|potencial(?:es|mente)?|quiz[aá]s?|significativ[oa]s?|habr[aá]|recomendad[oa]s?|evidencia para decidir|si (?:aumentar|cambiar|reducir|hacer|mejorar|implementar)\w*)\b/i;
 
 export function validarCoherencia(req: RequerimientoMotor): string[] {
   const errores: string[] = [];
